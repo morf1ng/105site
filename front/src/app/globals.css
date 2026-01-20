@@ -1,0 +1,36 @@
+body {
+    font-family: var(--font-raleway);
+}
+button {
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.transparent-input {
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    max-height: min-content;
+}
+
+.logo {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	font-family: "Raleway", sans-serif !important;
+	font-weight: 700 !important;
+	font-size: 20px !important;
+	line-height: 1 !important;
+	color: var(--light) !important;
+}
+
+.logo span {
+	white-space: nowrap !important;
+}
+
+.logo img {
+	height: 40px !important;
+	width: auto !important;
+}

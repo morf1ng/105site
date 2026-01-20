@@ -1,0 +1,963 @@
+.project-edit-container {
+    padding: 2em 2.5em;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.header-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #1C1C1C;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.back-button:hover {
+    opacity: 0.8;
+}
+
+.header-title {
+    font-size: 1rem;
+    color: white;
+}
+
+.save-button {
+    background-color: #412A76BD;
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 0.75em 1.5em;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.save-button:hover {
+    opacity: 0.9;
+}
+
+.project-view {
+    margin-top: 2em;
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+    background-color: #000000;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 3.5em;
+    box-sizing: border-box;
+}
+
+/* Basic Info Section Styles */
+.basic-info-section {
+    display: flex;
+    gap: 3em;
+    align-items: stretch;
+    margin-bottom: 2em;
+}
+
+.basic-info-left {
+    flex: 0 0 auto;
+    width: 45%;
+}
+
+.image-upload-area {
+    width: 100%;
+    min-height: 400px;
+    border: 1px solid #633BC0;
+    border-radius: 12px;
+    background-color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.image-upload-area:hover {
+    border-color: #9747FF;
+    background-color: rgba(99, 59, 192, 0.05);
+}
+
+.upload-icon {
+    color: #633BC0;
+    margin-bottom: 1em;
+}
+
+.upload-text {
+    color: #633BC0;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.uploaded-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Wide Image Section Styles */
+.wide-image-section {
+    margin-bottom: 2em;
+}
+
+.wide-image-upload-area {
+    width: 100%;
+    aspect-ratio: 2 / 1;
+    border: 1px solid #0C8CE9;
+    border-radius: 12px;
+    background: linear-gradient(to right, rgba(12, 140, 233, 0.1), rgba(0, 0, 0, 0.3));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.wide-image-upload-area:hover {
+    border-color: #0C8CE9;
+    background: linear-gradient(to right, rgba(12, 140, 233, 0.15), rgba(0, 0, 0, 0.4));
+}
+
+.wide-upload-icon {
+    width: 19px;
+    height: 19px;
+    margin-bottom: 1em;
+}
+
+.wide-upload-text {
+    color: #0C8CE9;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.uploaded-wide-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Project Stages Section Styles */
+.project-stages-section {
+    margin-bottom: 2em;
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+}
+
+.project-stages-section .stage-item {
+    display: flex;
+    gap: 2em;
+    align-items: stretch;
+}
+
+.project-stages-section .stage-item.stage-content-left {
+    flex-direction: row !important;
+}
+
+.project-stages-section .stage-item.stage-content-right {
+    flex-direction: row-reverse !important;
+}
+
+.project-stages-section .stage-image-container {
+    flex: 1;
+    display: flex;
+}
+
+.project-stages-section .stage-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+}
+
+.project-stages-section .stage-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.project-stages-section .stage-title-input {
+    background-color: rgba(28, 28, 28, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.75em 1em;
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.project-stages-section .stage-title-input:focus {
+    border-color: #633BC0;
+}
+
+.project-stages-section .stage-title-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: none;
+}
+
+.project-stages-section .stage-remove-button {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    padding: 0.5em 1em;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-self: flex-start;
+    margin-top: 0.5em;
+}
+
+.project-stages-section .stage-remove-button:hover {
+    background-color: rgba(220, 53, 69, 0.3);
+    border-color: rgba(220, 53, 69, 0.5);
+}
+
+.add-stage-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2em;
+    margin-bottom: 1em;
+}
+
+.add-stage-line {
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background-color: #0C8CE9;
+    z-index: 0;
+}
+
+.add-stage-button {
+    background-color: #0C8CE9;
+    color: white;
+    border: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 1;
+    padding: 0;
+}
+
+.add-stage-button:hover {
+    background-color: #0A7BC7;
+    transform: scale(1.05);
+}
+
+.add-stage-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.project-stages-section .stage-textarea {
+    background-color: rgba(28, 28, 28, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1em;
+    color: white;
+    font-size: 1rem;
+    font-family: inherit;
+    line-height: 1.5;
+    resize: none;
+    overflow: hidden;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: calc(1.5em * 4 + 2em);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.project-stages-section .stage-textarea:focus {
+    border-color: #633BC0;
+}
+
+.project-stages-section .stage-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.project-stages-section .stage-image-upload {
+    width: 100%;
+    aspect-ratio: 2 / 1;
+    border: 1px solid #0C8CE9;
+    border-radius: 12px;
+    background: linear-gradient(to right, rgba(12, 140, 233, 0.1), rgba(0, 0, 0, 0.3));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.project-stages-section .stage-image-upload:hover {
+    border-color: #0C8CE9;
+    background: linear-gradient(to right, rgba(12, 140, 233, 0.15), rgba(0, 0, 0, 0.4));
+}
+
+.project-stages-section .stage-upload-icon {
+    width: 19px;
+    height: 19px;
+    margin-bottom: 0.5em;
+}
+
+.project-stages-section .stage-upload-text {
+    color: #0C8CE9;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.project-stages-section .uploaded-stage-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Result Section Styles */
+.result-section {
+    margin-bottom: 2em;
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+    min-height: 600px;
+}
+
+.result-section-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.result-header {
+    display: flex;
+    gap: 2em;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.result-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    margin: 0;
+    flex: 0 0 auto;
+    min-width: 200px;
+}
+
+.result-description-textarea {
+    background-color: rgba(28, 28, 28, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1em;
+    color: white;
+    font-size: 1rem;
+    font-family: inherit;
+    line-height: 1.5;
+    resize: none;
+    overflow: hidden;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: calc(1.5em * 4 + 2em);
+    flex: 0 0 50%;
+    box-sizing: border-box;
+    margin-left: auto;
+}
+
+.result-description-textarea:focus {
+    border-color: #633BC0;
+}
+
+.result-description-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.result-images-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2em;
+    align-items: flex-end;
+    width: 100%;
+}
+
+.result-image-upload-left {
+    aspect-ratio: 2 / 2.1;
+    border: 1px solid #0C8CE9;
+    border-radius: 12px;
+    background: linear-gradient(to right, rgba(12, 140, 233, 0.1), rgba(0, 0, 0, 0.3));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.result-image-upload-right {
+    aspect-ratio: 4 / 3;
+    border: 1px solid #0C8CE9;
+    border-radius: 12px;
+    background: linear-gradient(to right, rgba(12, 140, 233, 0.1), rgba(0, 0, 0, 0.3));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.result-image-upload-left:hover,
+.result-image-upload-right:hover {
+    border-color: #0C8CE9;
+    background: linear-gradient(to right, rgba(12, 140, 233, 0.15), rgba(0, 0, 0, 0.4));
+}
+
+.result-upload-icon {
+    width: 19px;
+    height: 19px;
+    margin-bottom: 0.5em;
+}
+
+.result-upload-text {
+    color: #0C8CE9;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.uploaded-result-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 8px;
+}
+
+/* Statistics Section Styles */
+.statistics-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2em;
+    margin-bottom: 2em;
+}
+
+.statistic-card {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    min-height: 150px;
+}
+
+.statistic-label-input {
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    text-align: center;
+    width: 100%;
+    outline: none;
+    font-family: inherit;
+    padding: 0.25em;
+}
+
+.statistic-label-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.statistic-digit {
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 3rem;
+    font-weight: 700;
+    text-align: center;
+    width: 100%;
+    outline: none;
+    font-family: inherit;
+    padding: 0.25em;
+}
+
+.statistic-digit::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.laptop-container {
+    position: relative;
+}
+
+.laptop-frame {
+    width: 100%;
+    height: auto;
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+
+.laptop-preview-container {
+    position: absolute;
+    top: 3%;
+    left: 10%;
+    width: 80%;
+    height: 88%;
+    z-index: 0;
+    background-color: #000000;
+}
+
+.laptop-preview {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.basic-info-right {
+    flex: 1;
+    display: flex;
+    align-self: stretch;
+    min-height: 100%;
+    box-sizing: border-box;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 2em;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+}
+
+.project-title-input {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding: 0.5em 0;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+}
+
+.project-title-input:focus {
+    border-bottom-color: #633BC0;
+}
+
+.project-title-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.url-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-top: auto;
+}
+
+.url-icon {
+    width: 9px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.project-url-input {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    color: #633BC0;
+    font-size: 1rem;
+    padding: 0.5em 0;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+    cursor: pointer;
+    flex: 1;
+}
+
+.project-url-input:focus {
+    border-bottom-color: #633BC0;
+}
+
+.project-url-input::placeholder {
+    color: rgba(99, 59, 192, 0.5);
+}
+
+.project-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    margin: 0;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 1em;
+}
+
+.service-item {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    padding: 0.5em;
+}
+
+.project-url {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    color: #633BC0;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: opacity 0.2s;
+}
+
+.project-url:hover {
+    opacity: 0.8;
+}
+
+.url-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* Two Column Layout for About Company and Target/Task */
+.company-target-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2em;
+    margin-bottom: 2em;
+    align-items: stretch;
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 1.5em;
+    box-sizing: border-box;
+}
+
+/* About Company Section Styles */
+.about-company-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.about-company-section .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    margin: 0 0 1.5em 0;
+}
+
+.about-company-section .section-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+    flex: 1;
+}
+
+.company-textarea {
+    background-color: rgba(28, 28, 28, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1em;
+    color: white;
+    font-size: 1rem;
+    font-family: inherit;
+    line-height: 1.5;
+    resize: none;
+    overflow: hidden;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: calc(1.5em * 4 + 2em);
+    width: 100%;
+    box-sizing: border-box;
+    flex: 1;
+}
+
+.company-textarea:focus {
+    border-color: #633BC0;
+}
+
+.company-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* Target Task Section Styles */
+.target-task-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.target-section,
+.task-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.target-section .section-title,
+.task-section .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    margin: 0 0 1.5em 0;
+}
+
+.target-task-textarea {
+    background-color: rgba(28, 28, 28, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1em;
+    color: white;
+    font-size: 1rem;
+    font-family: inherit;
+    line-height: 1.5;
+    resize: none;
+    overflow: hidden;
+    min-height: calc(1.5em * 4 + 2em);
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+    flex: 1;
+}
+
+.target-task-textarea:focus {
+    border-color: #633BC0;
+}
+
+.target-task-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* Project Section Styles */
+.project-section {
+    background-color: rgba(28, 28, 28, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5em;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    margin: 0 0 1.5em 0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5em;
+}
+
+.section-header .section-title {
+    margin: 0;
+}
+
+.section-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+}
+
+/* Form Field Styles */
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.form-field label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+.form-field input,
+.form-field textarea {
+    background-color: rgba(28, 28, 28, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.75em 1em;
+    color: white;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+    outline: none;
+    border-color: rgba(65, 42, 118, 0.7);
+}
+
+.form-field textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Stage Item Styles (for other sections, not ProjectStagesSection) */
+.progress-item,
+.result-image-item {
+    background-color: rgba(28, 28, 28, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 1.5em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.stage-header,
+.progress-header,
+.image-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5em;
+}
+
+.stage-header h3,
+.progress-header h3,
+.image-item-header h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+/* Button Styles */
+.add-button {
+    background-color: #412A76BD;
+    color: white;
+    border: none;
+    padding: 0.5em 1em;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.add-button:hover {
+    opacity: 0.9;
+}
+
+.remove-button {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    padding: 0.4em 0.8em;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.remove-button:hover {
+    background-color: rgba(220, 53, 69, 0.3);
+    border-color: rgba(220, 53, 69, 0.5);
+}
+
+/* Result Images Section */
+.result-images-section {
+    margin-top: 1.5em;
+    padding-top: 1.5em;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.result-images-section .section-header {
+    margin-bottom: 1em;
+}
+
+.result-images-section .section-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+

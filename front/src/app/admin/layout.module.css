@@ -1,0 +1,26 @@
+:root {
+	--accent: #633BC0;
+	--accent-dark: #412A76;
+	--accent-light: #9747FF;
+	--dark: #000;
+	--light: #fff;
+	--gray: #2B2B2B;
+	
+	--accent-rgb: 99, 59, 192;
+	--accent-dark-rgb: 65, 42, 118;
+	--accent-light-rgb: 151, 71, 255;
+	--dark-rgb: 0, 0, 0;
+	--light-rgb: 255, 255, 255;
+	--gray-rgb: 43, 43, 43;
+}
+
+body {
+	background-color: var(--gray);
+	margin: 0;
+	color: var(--light);
+	font-family: "Inter", sans-serif;
+}
+
+body.no-scroll {
+	overflow: hidden;
+}
