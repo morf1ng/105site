@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react';
+import { compressImage } from '@/lib/imageUtils';
 
 type Stage = {
   title: string;
@@ -10,7 +11,7 @@ type StageItemProps = {
   stage: Stage;
   index: number;
   isEven: boolean;
-  onUpdate: (field: 'title' | 'description' | 'img', value: string) => void;
+  onUpdate: (field: 'title' | 'description' | 'img', value: string, file?: File) => void;
   onRemove: () => void;
   isFixedTitle: boolean;
 };
@@ -34,11 +35,20 @@ const StageItem = ({ stage, index, isEven, onUpdate, onRemove, isFixedTitle }: S
     fileInput?.click();
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      onUpdate('img', imageUrl);
+      try {
+        // Compress image before upload (1920px max, 90% quality - high quality)
+        const compressedFile = await compressImage(file, 1920, 1920, 0.9);
+        const imageUrl = URL.createObjectURL(compressedFile);
+        onUpdate('img', imageUrl, compressedFile);
+      } catch (error) {
+        console.error('Error processing image:', error);
+        // Fallback to original file
+        const imageUrl = URL.createObjectURL(file);
+        onUpdate('img', imageUrl, file);
+      }
     }
   };
 

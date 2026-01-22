@@ -1,6 +1,6 @@
 from sqlalchemy import text, inspect
-from .database import engine
-from .models import Base
+from database import engine
+from models import Base
 
 def create_tables():
     """Создает все таблицы в базе данных на основе моделей SQLAlchemy"""

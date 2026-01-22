@@ -4,10 +4,10 @@ export type ApiProject = {
   url: string;
   target: string;
   task: string;
-  about_company: string | null;
-  stages: string | null;
-  result: string | null;
-  progress: string | null;
+  about_company: string | { title: string; description: string } | null;
+  stages: string | Array<{ title: string; description: string; img: string | null }> | null;
+  result: string | { description: string; images: Array<{ type: string; img: string | null }> } | null;
+  progress: string | Array<{ digit: number; text: string }> | null;
   preview_img: string | null;
   notebook_img: string | null;
   main_img: string | null;
@@ -70,22 +70,20 @@ export type UpdateUserRequest = {
   role_ids?: string; // comma-separated role IDs
 };
 
-const BASE_URL = (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '').replace(/\/api$/, '');
-const API_BASE_URL = typeof window !== 'undefined' ? '/api' : `${BASE_URL}/api`;
+const BASE_URL = ('http://localhost:8000').replace(/\/$/, '').replace(/\/api$/, '');
+const API_BASE_URL = `${BASE_URL}/api`;
 
 export const getImageUrl = (path: string | null) => {
   if (!path) return '';
+  // If it's already a full URL or blob URL, return as-is
   if (path.startsWith('http') || path.startsWith('blob:')) return path;
+  // If it's an asset path, return as-is
   if (path.startsWith('/assets') || path.startsWith('assets/')) {
     return path.startsWith('/') ? path : `/${path}`;
   }
   
-  // В браузере картинки грузим через относительный путь /uploads/...
-  if (typeof window !== 'undefined') {
-    return `/uploads/${path.replace(/^\//, '')}`;
-  }
-  
-  // На сервере (SSR) используем полный путь бэкенда
+  // Always use full backend URL for uploads (both client and server)
+  // This ensures images are loaded from the backend server
   return `${BASE_URL}/uploads/${path.replace(/^\//, '')}`;
 };
 

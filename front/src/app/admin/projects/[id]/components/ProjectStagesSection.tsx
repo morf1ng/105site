@@ -3,16 +3,23 @@ import StageItem from './StageItem';
 
 type ProjectStagesSectionProps = {
   project: Project;
-  onUpdate: (updates: Partial<Project>) => void;
+  onUpdate: (updates: Partial<Project>, fileUpdates?: {
+    preview_img?: File;
+    main_img?: File;
+    notebook_img?: File;
+    stage_imgs?: { index: number; file: File }[];
+    result_imgs?: { index: number; file: File }[];
+  }) => void;
 };
 
 const ProjectStagesSection = ({ project, onUpdate }: ProjectStagesSectionProps) => {
   const fixedTitles = ['Аналитика', 'Проектирование', 'Дизайн'];
 
-  const updateStage = (index: number, field: 'title' | 'description' | 'img', value: string) => {
+  const updateStage = (index: number, field: 'title' | 'description' | 'img', value: string, file?: File) => {
     const updatedStages = [...project.stages];
     updatedStages[index] = { ...updatedStages[index], [field]: value };
-    onUpdate({ stages: updatedStages });
+    const fileUpdates = file ? { stage_imgs: [{ index, file }] } : undefined;
+    onUpdate({ stages: updatedStages }, fileUpdates);
   };
 
   const removeStage = (index: number) => {
@@ -45,7 +52,7 @@ const ProjectStagesSection = ({ project, onUpdate }: ProjectStagesSectionProps) 
             stage={displayStage}
             index={index}
             isEven={isEven}
-            onUpdate={(field, value) => updateStage(index, field, value)}
+            onUpdate={(field, value, file) => updateStage(index, field, value, file)}
             onRemove={() => removeStage(index)}
             isFixedTitle={isFixedTitle}
           />

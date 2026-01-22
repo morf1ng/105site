@@ -186,7 +186,7 @@ header .lang {
 .hero__left-link {
 	background-color: rgba(var(--accent-dark-rgb), .74);
 	color: var(--light);
-	width: max-content;
+	width: fit-content;
 	padding: 14px 24px;
 	border-radius: 16px;
 	border: 1px solid var(--accent-dark);
@@ -883,7 +883,6 @@ header .lang {
 	padding: 15px 20px;
 	font-size: 16px;
 	color: var(--light) !important;
-	width: 100%;
 	transition: border-color 0.3s ease;
 	outline: none;
 }
@@ -919,6 +918,12 @@ header .lang {
 	font-size: 20px;
 	color: rgba(var(--light-rgb), .7);
 	/* color: var(--light); */
+}
+
+.contacts__icons {
+	width: 36px;
+	height: 36px;
+	padding: 4px;
 }
 
 .contacts__right-contacts div {
@@ -1075,7 +1080,7 @@ header .lang {
 }
 
 .f-e-1 {
-	right: 0;
+	left: 0;
 	top: 0;
 }
 
@@ -1093,10 +1098,12 @@ header .lang {
 
 .f-b {
 	bottom: 0;
+	right: 0;
 }
 
 .f-b.two {
-	right: 0;
+	left: 0;
+
 }
 
 	.header__burger {

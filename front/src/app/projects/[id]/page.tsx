@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation';
 import Footer from '@/components/Footer';
 
 const ProjectsPage = async ({params}: { params: { id: string } })  => {
-    const { id } = params;
+    const { id } = await params;
     let project: Project | null = null;
 
     try {
@@ -36,83 +36,6 @@ const ProjectsPage = async ({params}: { params: { id: string } })  => {
         <>
             <img src="/assets/icons/f-e-1.svg" alt="" className="f-e-1"/>
             <img src="/assets/icons/f-e-1-mob.svg" alt="" className="f-e-1-mob"/>
-            {/* <header>
-                <div className="herder__container container">
-                    <div className="logo"><img src="/assets/icons/logo.svg" alt="DAG CODE - LOGO"/></div>
-                    <div className="menu">
-                        <nav>
-                            <a className="header__menu-link active" href="#hero">Главная</a>
-                        </nav>
-                        <nav>
-                            <a className="header__menu-link " href="#about">О нас</a>
-                        </nav>
-                        <nav>
-                            <a className="header__menu-link " href="#doing">Услуги</a>
-                        </nav>
-                        <nav>
-                            <a className="header__menu-link " href="#portfolio">Кейсы</a>
-                        </nav>
-                        <nav>
-                            <a className="header__menu-link " href="#team">Команда</a>
-                        </nav>
-                        <nav>
-                            <a className="header__menu-link " href="#faq">FAQ</a>
-                        </nav>
-                        <nav>
-                            <a className="header__menu-link " href="#contacts">Контакты</a>
-                        </nav>
-                    </div>
-                    <div className="call">
-                        <a href="#!" className="call-btn">Заказать звонок</a>
-                        <div className="header__burger">
-                            <div className="header__burger-line"></div>
-                            <div className="header__burger-line"></div>
-                            <div className="header__burger-line"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="burger__menu glass-border">
-                    <div className="burger__menu-links">
-                        <nav>
-                            <a className="header__menu-link active" href="#hero">Главная</a>
-                            <img src="/assets/icons/link.svg" alt=""/>
-                        </nav>
-                        <nav>
-                            <a className="header__menu-link " href="#about">О нас</a>
-                            <img src="/assets/icons/link.svg" alt=""/>
-                        </nav>
-                        <nav>
-                            <a className="header__menu-link " href="#doing">Услуги</a>
-                            <img src="/assets/icons/link.svg" alt=""/>
-                        </nav>
-                        <nav>
-                            <a className="header__menu-link " href="#portfolio">Кейсы</a>
-                            <img src="/assets/icons/link.svg" alt=""/>
-                        </nav>
-                        <nav>
-                            <a className="header__menu-link " href="#team">Команда</a>
-                            <img src="/assets/icons/link.svg" alt=""/>
-                        </nav>
-                        <nav>
-                            <a className="header__menu-link " href="#faq">FAQ</a>
-                            <img src="/assets/icons/link.svg" alt=""/>
-                        </nav>
-                        <nav>
-                            <a className="header__menu-link " href="#contacts">Контакты</a>
-                            <img src="/assets/icons/link.svg" alt=""/>
-                        </nav>
-                    </div>
-                    <div className="burger__menu-social">
-                        <a href="">8 (800) 101 43 25</a>
-                        <div className="footer__top-right-cosial">
-                            <a href=""><img src="/assets/icons/tg.svg" alt=""/></a>
-                            <a href=""><img src="/assets/icons/tg.svg" alt=""/></a>
-                            <a href=""><img src="/assets/icons/tg.svg" alt=""/></a>
-                        </div>
-                    </div>
-                </div>
-            </header> */}
             <Header />
 
 
@@ -125,7 +48,7 @@ const ProjectsPage = async ({params}: { params: { id: string } })  => {
                     </div>
                     <div className="p-hero__container-bottom">
                         <div className="p-hero__container__left">
-                            <img src={getImageUrl(project.notebook_img || project.preview_img) || "/assets/images/hero.png"} alt={project.title}/>
+                            <img src={getImageUrl(project.notebook_img || project.preview_img) || ""} alt={project.title}/>
                         </div>
                         <div className="p-hero__container__right">
                             <div className="p-hero__container__right-title">{project.title.toUpperCase()}</div>
@@ -155,14 +78,14 @@ const ProjectsPage = async ({params}: { params: { id: string } })  => {
                 <div className="p-about__container container glass-border">
                     <div className="p-about__container-left">
                         <span>О компании</span>
-                        <div className="p-about__container-left-title text">{project.about_company.title}</div>
-                        <div className="text">{project.about_company.description}</div>
+                        <div className="p-about__container-left-title text">{project.about_company?.title || ''}</div>
+                        <div className="text">{project.about_company?.description || ''}</div>
                     </div>
                     <div className="p-about__container-right">
                         <span>ЦЕЛЬ</span>
-                        <div className="text">{project.target}</div>
+                        <div className="text">{project.target || ''}</div>
                         <span>ЗАДАЧА</span>
-                        <div className="text">{project.task}</div>
+                        <div className="text">{project.task || ''}</div>
                     </div>
                 </div>
             </section>
@@ -175,15 +98,15 @@ const ProjectsPage = async ({params}: { params: { id: string } })  => {
 
             <section className="p-work-stages">
                 <div className="p-work-stages__container container">
-                    {project.stages.map((stage, index) => {
+                    {(project.stages || []).map((stage, index) => {
                         return (
                             <div key={index} className="p-work-stages-elem">
                                 <div className="p-work-stages-elem-left">
-                                    <div className="p-work-stages-elem-title">{stage.title.toUpperCase()}</div>
-                                    <div className="p-work-stages-elem-subtitle">{stage.description}</div>
+                                    <div className="p-work-stages-elem-title">{stage.title?.toUpperCase() || ''}</div>
+                                    <div className="p-work-stages-elem-subtitle">{stage.description || ''}</div>
                                 </div>
                                 <div className="p-work-stages-elem-right">
-                                    <img src={getImageUrl(stage.img) || "/assets/images/ANALYTICS.png"} alt={stage.title}/>
+                                    <img src={stage.img || "/assets/images/ANALYTICS.png"} alt={stage.title || ''}/>
                                 </div>
                             </div>
                         );
@@ -193,21 +116,21 @@ const ProjectsPage = async ({params}: { params: { id: string } })  => {
 
             <section className="p-result">
                 <div className="p-result__container container">
-                    <div className="p-result__container-title">{project.result.title.toUpperCase()}</div>
+                    <div className="p-result__container-title">РЕЗУЛЬТАТ</div>
                     <div className="p-result__container-subtitle">
-                        {project.result.description}
+                        {project.result?.description || ''}
                     </div>
                 </div>
             </section>
 
             <section className="p-gallery">
                 <div className="p-gallery__container container">
-                    {project.result.images && project.result.images.length > 0 && (
+                    {project.result?.images && project.result.images.length > 0 && (
                         <>
                             {project.result.images.find(img => img.type === 'tablet' || img.type === 'dashboard') && (
                                 <img 
                                     className="tab" 
-                                    src={getImageUrl(project.result.images.find(img => img.type === 'tablet' || img.type === 'dashboard')?.img || null) || "/assets/images/tab.png"} 
+                                    src={project.result.images.find(img => img.type === 'tablet' || img.type === 'dashboard')?.img || "/assets/images/tab.png"} 
                                     alt={project.title}
                                 />
                             )}
@@ -216,7 +139,7 @@ const ProjectsPage = async ({params}: { params: { id: string } })  => {
                                     .filter(img => img.type === 'mobile' || img.type === 'phone' || img.type === 'smartphone')
                                     .slice(0, 3)
                                     .map((img, index) => (
-                                        <img key={index} src={getImageUrl(img.img)} alt={`${project.title} - ${index + 1}`}/>
+                                        <img key={index} src={img.img || "/assets/images/mob-1.png"} alt={`${project.title} - ${index + 1}`}/>
                                     ))}
                                 {project.result.images.filter(img => img.type === 'mobile' || img.type === 'phone' || img.type === 'smartphone').length === 0 && (
                                     <>
@@ -228,9 +151,9 @@ const ProjectsPage = async ({params}: { params: { id: string } })  => {
                             </div>
                         </>
                     )}
-                    {(!project.result.images || project.result.images.length === 0) && (
+                    {(!project.result?.images || project.result.images.length === 0) && (
                         <>
-                            <img className="tab" src="./images/tab.png" alt=""/>
+                            <img className="tab" src="/assets/images/tab.png" alt=""/>
                             <div className="p-gallery__container-mobs">
                                 <img src="/assets/images/mob-1.png" alt=""/>
                                 <img src="/assets/images/mob-2.png" alt=""/>
@@ -272,15 +195,15 @@ const ProjectsPage = async ({params}: { params: { id: string } })  => {
                         <div className="contacts__title">Контакты</div>
                         <div className="contacts__right-contacts">
                             <div>
-                                <img src="/assets/icons/tel-icon.svg" alt=""/>
+                                <img className='contacts__icons' src="/assets/icons/tel-icon.svg" alt=""/>
                                 <a href="tel:+78888888888">8 (888) 888 88 88</a>
                             </div>
                             <div>
-                                <img src="/assets/icons/gmail-icon.svg" alt=""/>
+                                <img className='contacts__icons' src="/assets/icons/gmail-icon.svg" alt=""/>
                                 <a href="mailto:">soft@studio.ru</a>
                             </div>
                             <div>
-                                <img src="/assets/icons/tg-icon.svg" alt=""/>
+                                <img className='contacts__icons' src="/assets/icons/tg-icon.svg" alt=""/>
                                 <a href="https://t.me/durov">@softstudiotg</a>
                             </div>
                         </div>
