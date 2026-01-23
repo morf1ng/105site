@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from sqlalchemy import text, inspect
 from database import engine
 from models import Base

@@ -932,6 +932,8 @@ header .lang {
 
 .contacts__right-contacts div img {
 	color: #27C93F;
+	width: 40px;
+	height: 40px;
 	padding: 7px;
 	border-radius: 5px;
 	background-color: rgba(var(--accent-light-rgb), .24);
@@ -1558,6 +1560,7 @@ header .lang {
 
 		.f-e-faq-mob {
 			display: block;
+			width: 100%;
 		}
 
 		.contacts__container,

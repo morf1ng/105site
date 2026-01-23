@@ -149,9 +149,9 @@ header .lang {
 	border: 1px solid var(--accent);
 	border-radius: 10px;
 }
-.logo{
+/* .logo{
 	display: block;
-}
+} */
 
 /* === HERO === */
 .hero {
@@ -1080,8 +1080,9 @@ header .lang {
 }
 
 .f-e-1 {
+	transform: scaleY(-1);
+	transform:scaleX(-1);
 	left: 0;
-	top: 0;
 }
 
 .f-e-2 {
@@ -1856,10 +1857,15 @@ header .lang {
 .p-about__container {
 	font-size: 16px;
 	display: flex;
+	justify-content: space-between;
 	gap: 178px;
 	padding: 27px 62px;
 	color: rgba(var(--light-rgb), .7);
 	background-color: rgba(var(--dark-rgb), .16);
+}
+
+.p-about__container div {
+	flex-grow: 1;
 }
 
 .p-about__container span {
@@ -1923,8 +1929,12 @@ header .lang {
 }
 
 .p-after-about__container {
+	height: 45em;
+	width: 100%;
 	border-radius: 30px;
 	padding: 0;
+	overflow: hidden;
+
 }
 
 .p-after-about__container img {
@@ -2027,11 +2037,13 @@ header .lang {
 }
 
 .p-result__container-title {
+	flex-grow: 1;
 	font-size: 32px;
 	font-weight: 600;
 }
 
 .p-result__container-subtitle {
+	flex-grow: 1;
 	font-size: 20px;
 	color: rgba(var(--light-rgb), .7);
 	max-width: 647px;
@@ -2050,10 +2062,27 @@ header .lang {
 	gap: 60px;
 }
 
+/* Tablet image with 521px × 674px aspect ratio */
 .p-gallery__container .tab {
+	width: 521px;
+	max-width: 100%;
+	aspect-ratio: 521 / 674;
+	object-fit: cover;
 	border-radius: 1.5em;
-	max-width: 521px;
-	height: auto;
+}
+
+/* Mobile image with 264px × 533px aspect ratio */
+.p-gallery__container .mob {
+	width: 264px;
+	max-width: 100%;
+	aspect-ratio: 264 / 533;
+	object-fit: cover;
+	border-radius: 1.5em;
+}
+
+
+.p-gallery__container .p-gallery__mobile-picture {
+	border-radius: 1.5em;		
 }
 
 .p-gallery__container-mobs {
@@ -2063,7 +2092,7 @@ header .lang {
 	gap: 20px;
 }
 
-.p-gallery__container-mobs img {
+.p-gallery__container-mobs img:not(.mob-frame):not(.mob) {
 	max-width: 284px;
 	width: 100%;
 }
@@ -2084,13 +2113,28 @@ header .lang {
 		width: 100%;
 	}
 
-	.p-gallery__container-mobs img {
+	.p-gallery__container-mobs img:not(.mob) {
 		max-width: 25vw;
 	}
 
+	.p-gallery__container .mob {
+		max-width: 25vw;
+		width: 100%;
+	}
+	
 	.p-gallery__container .tab {
 		max-width: 100%;
-		min-width: 0;
+		width: 100%;
+	}
+
+	.p-gallery__container .tab {
+		width: 100%;
+		max-width: 521px;
+	}
+
+	.p-gallery__container .mob {
+		width: 100%;
+		max-width: 264px;
 	}
 }
 

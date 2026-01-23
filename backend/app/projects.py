@@ -223,6 +223,13 @@ async def update_project(
     
     # Debug: Print all form keys to see what we have
     print(f"[UPDATE] All form keys: {list(form.keys())}", flush=True)
+    # Debug: Print types of file-related keys
+    for key in ['preview_img', 'main_img', 'notebook_img']:
+        if key in form:
+            val = form.get(key)
+            print(f"[UPDATE] {key}: type={type(val)}, hasattr read={hasattr(val, 'read') if val else False}, hasattr filename={hasattr(val, 'filename') if val else False}", flush=True)
+            if val and hasattr(val, 'filename'):
+                print(f"[UPDATE] {key} filename: {val.filename}", flush=True)
     sys.stdout.flush()
     
     # Extract all form fields
@@ -236,17 +243,35 @@ async def update_project(
     progress = form.get("progress", "[]")
     
     # Extract single file fields
+    # FastAPI/Starlette returns files from form as UploadFile-like objects
+    # Check by presence of 'read' and 'filename' methods instead of isinstance
     preview_img = form.get("preview_img")
-    if not isinstance(preview_img, UploadFile):
-        preview_img = None
+    if preview_img is not None:
+        # Check if it's a file-like object (has read method and filename)
+        if not (hasattr(preview_img, 'read') and hasattr(preview_img, 'filename')):
+            print(f"[UPDATE] preview_img is not a file object, type: {type(preview_img)}", flush=True)
+            preview_img = None
+        elif not preview_img.filename or preview_img.filename.strip() == '':
+            print(f"[UPDATE] preview_img has empty filename", flush=True)
+            preview_img = None
     
     main_img = form.get("main_img")
-    if not isinstance(main_img, UploadFile):
-        main_img = None
+    if main_img is not None:
+        if not (hasattr(main_img, 'read') and hasattr(main_img, 'filename')):
+            print(f"[UPDATE] main_img is not a file object, type: {type(main_img)}", flush=True)
+            main_img = None
+        elif not main_img.filename or main_img.filename.strip() == '':
+            print(f"[UPDATE] main_img has empty filename", flush=True)
+            main_img = None
     
     notebook_img = form.get("notebook_img")
-    if not isinstance(notebook_img, UploadFile):
-        notebook_img = None
+    if notebook_img is not None:
+        if not (hasattr(notebook_img, 'read') and hasattr(notebook_img, 'filename')):
+            print(f"[UPDATE] notebook_img is not a file object, type: {type(notebook_img)}", flush=True)
+            notebook_img = None
+        elif not notebook_img.filename or notebook_img.filename.strip() == '':
+            print(f"[UPDATE] notebook_img has empty filename", flush=True)
+            notebook_img = None
     
     print(f"[UPDATE] Single files: preview_img={preview_img is not None}, main_img={main_img is not None}, notebook_img={notebook_img is not None}", flush=True)
     sys.stdout.flush()

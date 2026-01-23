@@ -34,7 +34,7 @@ const ProjectsPage = async ({params}: { params: { id: string } })  => {
 
     return (
         <>
-            <img src="/assets/icons/f-e-1.svg" alt="" className="f-e-1"/>
+            <img src="/assets/icons/f-e-3.svg" alt="" className="f-e-1"/>
             <img src="/assets/icons/f-e-1-mob.svg" alt="" className="f-e-1-mob"/>
             <Header />
 
@@ -129,8 +129,8 @@ const ProjectsPage = async ({params}: { params: { id: string } })  => {
                         <>
                             {project.result.images.find(img => img.type === 'tablet' || img.type === 'dashboard') && (
                                 <img 
-                                    className="tab" 
-                                    src={project.result.images.find(img => img.type === 'tablet' || img.type === 'dashboard')?.img || "/assets/images/tab.png"} 
+                                    className="tab"
+                                    src={getImageUrl(project.result.images.find(img => img.type === 'tablet' || img.type === 'dashboard')!.img) || "/assets/images/tab.png"} 
                                     alt={project.title}
                                 />
                             )}
@@ -139,7 +139,12 @@ const ProjectsPage = async ({params}: { params: { id: string } })  => {
                                     .filter(img => img.type === 'mobile' || img.type === 'phone' || img.type === 'smartphone')
                                     .slice(0, 3)
                                     .map((img, index) => (
-                                        <img key={index} src={img.img || "/assets/images/mob-1.png"} alt={`${project.title} - ${index + 1}`}/>
+                                        <img 
+                                            key={index}
+                                            className='mob' 
+                                            src={getImageUrl(img.img) || "/assets/images/mob-1.png"} 
+                                            alt={`${project.title} - ${index + 1}`}
+                                        />
                                     ))}
                                 {project.result.images.filter(img => img.type === 'mobile' || img.type === 'phone' || img.type === 'smartphone').length === 0 && (
                                     <>
@@ -210,28 +215,6 @@ const ProjectsPage = async ({params}: { params: { id: string } })  => {
                     </div>
                 </div>
             </section>
-            {/* <footer className="footer">
-                <div className="footer__container container">
-
-                    <div className="footer__top">
-                        <div className="footer__top-left">
-                            <img src="/assets/icons/logo.svg" alt="" className="logo"/>
-                            <div className="footer__text">Нужно написать какой-то текст, который никто не прочтет? Пишите сюда.</div>
-                        </div>
-                        <div className="footer__top-right">
-                            <a className="footer__top-right-tel" href="tel:">8 (888) 888 88 88</a>
-                            <div className="adress">
-                                Улица Дзержинского 21 <br/>© ДГУ
-                            </div>
-                            <div className="footer__top-right-cosial">
-                                <a href=""><img src="/assets/icons/tg.svg" alt=""/></a>
-                                <a href=""><img src="/assets/icons/tg.svg" alt=""/></a>
-                                <a href=""><img src="/assets/icons/tg.svg" alt=""/></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </footer> */}
 
             <Footer />
 

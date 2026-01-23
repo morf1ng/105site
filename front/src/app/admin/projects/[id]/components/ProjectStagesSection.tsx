@@ -13,8 +13,6 @@ type ProjectStagesSectionProps = {
 };
 
 const ProjectStagesSection = ({ project, onUpdate }: ProjectStagesSectionProps) => {
-  const fixedTitles = ['Аналитика', 'Проектирование', 'Дизайн'];
-
   const updateStage = (index: number, field: 'title' | 'description' | 'img', value: string, file?: File) => {
     const updatedStages = [...project.stages];
     updatedStages[index] = { ...updatedStages[index], [field]: value };
@@ -40,11 +38,11 @@ const ProjectStagesSection = ({ project, onUpdate }: ProjectStagesSectionProps) 
     <div className="project-stages-section">
       {project.stages.map((stage, index) => {
         const isEven = index % 2 === 0;
-        const isFixedTitle = index < fixedTitles.length;
-        // For fixed titles, use the fixed title; for others, use the stage's title or default
-        const displayStage = isFixedTitle 
-          ? { ...stage, title: fixedTitles[index] }
-          : { ...stage, title: stage.title || `Этап ${index + 1}` };
+        // Use the actual stage title, with a fallback for empty titles
+        const displayStage = { 
+          ...stage, 
+          title: stage.title || `Этап ${index + 1}` 
+        };
         
         return (
           <StageItem
@@ -54,7 +52,7 @@ const ProjectStagesSection = ({ project, onUpdate }: ProjectStagesSectionProps) 
             isEven={isEven}
             onUpdate={(field, value, file) => updateStage(index, field, value, file)}
             onRemove={() => removeStage(index)}
-            isFixedTitle={isFixedTitle}
+            isFixedTitle={false}
           />
         );
       })}
