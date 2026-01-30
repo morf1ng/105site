@@ -319,6 +319,33 @@ export async function refreshTokenOnApi(
   return apiFormUrlEncoded<RefreshTokenResponse>('/auth/refresh', request);
 }
 
+/** Decode JWT payload (no verification; used only to read user_id for display). */
+function decodeJwtPayload(token: string): { user_id?: number } | null {
+  try {
+    const parts = token.replace(/^Bearer\s+/i, '').trim().split('.');
+    if (parts.length !== 3) return null;
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const json = typeof atob !== 'undefined' ? atob(base64) : Buffer.from(base64, 'base64').toString('utf8');
+    return JSON.parse(json) as { user_id?: number };
+  } catch {
+    return null;
+  }
+}
+
+/** Get the currently signed-in user (uses user_id from JWT + GET /admin/users/{user_id}). */
+export async function getCurrentUserFromApi(): Promise<ApiUser | null> {
+  const token = getAccessToken();
+  if (!token) return null;
+  const payload = decodeJwtPayload(token);
+  const userId = payload?.user_id;
+  if (userId == null) return null;
+  try {
+    return await fetchUserFromApi(userId);
+  } catch {
+    return null;
+  }
+}
+
 // ===== Admin Roles =====
 
 // Получить список ролей (GET /admin/roles)
