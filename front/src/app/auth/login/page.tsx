@@ -34,8 +34,8 @@ const LoginPage = () => {
             <img className='f-b-1' src='/assets/icons/f-e-2.svg' />
             <div className="main-container">
                 <header className="header">
-                    <div className="header__dagcode-logo">
-                        <img src='/assets/icons/dagcode-icon-text.svg' />
+                    <div className="header__ss-logo">
+                        <img className='header__ss-logo-img' src='/assets/images/ss-text-logo.png' />
                     </div>
                 </header>
 

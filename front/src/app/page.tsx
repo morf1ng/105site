@@ -14,9 +14,12 @@ import Portfolio from "@/components/Portfolio";
 export default function Home() {
   return (
     <>
+		{/* animated elements */}
 		<Parallax />
 		<FaqAccordion />
 		<PortfolioDragSlider />
+
+		
 		<img src="/assets/icons/f-e-1.svg" alt="" className="f-e-1"/>
 		<img src="/assets/icons/f-e-1-mob.svg" alt="" className="f-e-1-mob"/>
 		<Header />
@@ -52,7 +55,7 @@ export default function Home() {
 						</div>
 					</div>
 					<div className="about__top-right">
-						<img className="parallax-element" src="assets/icons/cursor.svg" alt=""/>
+						<img className="parallax-element" src="assets/images/cursor1.svg" alt=""/>
 					</div>
 				</div>
 				<div className="about__bottom">

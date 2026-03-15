@@ -11,7 +11,7 @@ const Header = () => {
             <header>
                 <div className="herder__container container">
                     <div className="logo">
-                        <img src="/assets/icons/ss-icon-text.svg" alt="СОФТ СТУДИЯ - LOGO"/>
+                        <img src="/assets/images/ss-logo.png" alt="СОФТ СТУДИЯ - LOGO"/>
                         <span>СОФТ СТУДИЯ</span>
                     </div>
                     <div className="menu">
