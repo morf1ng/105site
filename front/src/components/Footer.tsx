@@ -7,7 +7,7 @@ const Footer = () => {
         <div className="footer__top">
             <div className="footer__top-left">
                 <div className="logo">
-                    <img src="assets/images/ss-logo.png" alt="" />
+                    <img src="assets/images/ss-logo.svg" alt="" />
                     <span>СОФТ СТУДИЯ</span>
                 </div>
                 <div className="footer__text">ООО "105 СОФТ-СТУДИЯ"<br/>ИНН: 0500044302<br/>ОГРН: 1250500019087<br/>Юр. адрес: 367000, Республика Дагестан, г Махачкала, ул Дзержинского, д. 21</div>
