@@ -1,387 +1,535 @@
-# 🚀 Инструкция по развертыванию Soft Studio
+# Развёртывание 105 Soft Studio на сервере
 
-Полное руководство по развертыванию проекта Soft Studio на сервере.
-
-## 📋 Содержание
-
-1. [Требования](#требования)
-2. [Быстрый старт с Docker Compose](#быстрый-старт-с-docker-compose)
-3. [Ручное развертывание](#ручное-развертывание)
-4. [Настройка переменных окружения](#настройка-переменных-окружения)
-5. [Настройка для продакшн](#настройка-для-продакшн)
-6. [Troubleshooting](#troubleshooting)
+Домен: **105dev.online**
+Стек: **Next.js 16 + FastAPI + PostgreSQL + Nginx + Docker**
 
 ---
 
-## 🔧 Требования
+## Оглавление
 
-- **Docker** версии 20.10 или выше
-- **Docker Compose** версии 2.0 или выше
-- **Git** для клонирования репозитория
-- **Минимум 2GB RAM** на сервере
-- **Минимум 10GB свободного места** на диске
-
-Для ручного развертывания дополнительно:
-- **Python 3.12+**
-- **Node.js 20+** и npm
-- **PostgreSQL 15+**
-
----
-
-## 🐳 Быстрый старт с Docker Compose
-
-### Шаг 1: Подготовка
-
-1. Клонируйте репозиторий:
-```bash
-git clone <your-repo-url>
-cd softstudio
-```
-
-2. Создайте файл `.env` на основе примера:
-```bash
-cp env.example .env
-```
-
-3. Отредактируйте `.env` файл и установите безопасные значения:
-```bash
-# Обязательно измените эти значения!
-POSTGRES_PASSWORD=your_secure_password_here
-SECRET_KEY=your-very-secure-secret-key-change-this-in-production
-```
-
-### Шаг 2: Запуск
-
-Запустите все сервисы одной командой:
-```bash
-docker-compose up -d
-```
-
-Эта команда:
-- Создаст и запустит PostgreSQL базу данных
-- Соберет и запустит Backend API (FastAPI)
-- Соберет и запустит Frontend (Next.js)
-- Выполнит миграции базы данных автоматически
-
-### Шаг 3: Проверка
-
-Проверьте статус контейнеров:
-```bash
-docker-compose ps
-```
-
-Все сервисы должны быть в статусе `Up`:
-- `softstudio_postgres` - база данных
-- `softstudio_backend` - API сервер (порт 8000)
-- `softstudio_frontend` - веб-приложение (порт 3000)
-
-### Шаг 4: Доступ к приложению
-
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8000
-- **API Документация**: http://localhost:8000/docs
+1. [Что такое Docker и зачем он нужен](#1-что-такое-docker-и-зачем-он-нужен)
+2. [Требования к серверу](#2-требования-к-серверу)
+3. [Подключение к серверу](#3-подключение-к-серверу)
+4. [Установка Docker на сервер](#4-установка-docker-на-сервер)
+5. [Настройка DNS домена](#5-настройка-dns-домена)
+6. [Загрузка проекта на сервер](#6-загрузка-проекта-на-сервер)
+7. [Настройка переменных окружения](#7-настройка-переменных-окружения)
+8. [Первый запуск (без SSL)](#8-первый-запуск-без-ssl)
+9. [Получение SSL-сертификата](#9-получение-ssl-сертификата)
+10. [Переключение на HTTPS](#10-переключение-на-https)
+11. [Проверка работоспособности](#11-проверка-работоспособности)
+12. [Обновление проекта](#12-обновление-проекта)
+13. [Полезные команды Docker](#13-полезные-команды-docker)
+14. [Устранение проблем](#14-устранение-проблем)
 
 ---
 
-## 🛠️ Ручное развертывание
+## 1. Что такое Docker и зачем он нужен
 
-Если вы предпочитаете развертывать без Docker:
+**Docker** — это инструмент, который упаковывает приложение вместе со всеми его зависимостями в изолированные «контейнеры». Представь, что контейнер — это коробка, внутри которой лежит всё необходимое для работы программы: код, библиотеки, настройки.
 
-### Backend
+**Зачем это нужно:**
+- Не нужно вручную устанавливать Python, Node.js, PostgreSQL на сервер
+- Одна команда — и весь проект запущен
+- На любом сервере работает одинаково
+- Легко обновлять и откатывать изменения
 
-1. Перейдите в директорию backend:
-```bash
-cd backend
+**Основные понятия:**
+| Термин | Что это |
+|--------|---------|
+| **Image (образ)** | «Чертёж» контейнера. Создаётся из Dockerfile |
+| **Container (контейнер)** | Запущенный экземпляр образа. Как запущенная программа |
+| **Dockerfile** | Файл-инструкция, как собрать образ |
+| **docker-compose.yml** | Файл, описывающий несколько контейнеров сразу |
+| **Volume (том)** | Постоянное хранилище данных (чтобы данные не пропали при перезапуске) |
+
+**Наш проект состоит из 5 контейнеров:**
+```
+┌─────────────────────────────────────────────────┐
+│                  СЕРВЕР                          │
+│                                                  │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐   │
+│  │  Nginx   │───▶│ Frontend │    │ Certbot  │   │
+│  │ :80/:443 │    │  :3000   │    │  (SSL)   │   │
+│  │          │───▶│          │    │          │   │
+│  │          │    └──────────┘    └──────────┘   │
+│  │          │                                    │
+│  │          │───▶┌──────────┐    ┌──────────┐   │
+│  │          │    │ Backend  │───▶│PostgreSQL│   │
+│  └──────────┘    │  :8000   │    │  :5432   │   │
+│                  └──────────┘    └──────────┘   │
+└─────────────────────────────────────────────────┘
 ```
 
-2. Создайте виртуальное окружение:
+- **Nginx** — принимает все запросы из интернета и направляет их куда нужно
+- **Frontend** — Next.js сайт (то, что видит пользователь)
+- **Backend** — FastAPI API (обрабатывает данные)
+- **PostgreSQL** — база данных
+- **Certbot** — автоматически получает и обновляет SSL-сертификат (замочек HTTPS)
+
+---
+
+## 2. Требования к серверу
+
+- **ОС:** Ubuntu 22.04 / 24.04 (рекомендуется)
+- **RAM:** минимум 2 ГБ (рекомендуется 4 ГБ)
+- **Диск:** минимум 20 ГБ
+- **Открытые порты:** 80 (HTTP), 443 (HTTPS), 22 (SSH)
+
+---
+
+## 3. Подключение к серверу
+
+Открой терминал (PowerShell / Terminal) и подключись:
+
 ```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# или
-venv\Scripts\activate  # Windows
+ssh root@IP_АДРЕС_СЕРВЕРА
 ```
 
-3. Установите зависимости:
+Например:
 ```bash
-pip install -r requirements.txt
+ssh root@193.201.126.66
 ```
 
-4. Создайте файл `.env` в директории `backend`:
+При первом подключении спросит «Are you sure?» — напиши `yes` и нажми Enter.
+Затем введи пароль от сервера.
+
+---
+
+## 4. Установка Docker на сервер
+
+Выполни эти команды **на сервере** по очереди:
+
+### 4.1. Обновление системы
+
+```bash
+apt update && apt upgrade -y
+```
+
+### 4.2. Установка Docker
+
+```bash
+curl -fsSL https://get.docker.com | sh
+```
+
+### 4.3. Проверка установки
+
+```bash
+docker --version
+docker compose version
+```
+
+Должно показать версии, например:
+```
+Docker version 27.x.x
+Docker Compose version v2.x.x
+```
+
+Если `docker compose version` не работает, установи плагин отдельно:
+```bash
+apt install docker-compose-plugin -y
+```
+
+---
+
+## 5. Настройка DNS домена
+
+Зайди в панель управления DNS у своего регистратора домена (где покупал `105dev.online`) и добавь **A-записи**:
+
+| Тип | Имя | Значение |
+|-----|-----|----------|
+| A | @ | IP_АДРЕС_СЕРВЕРА |
+| A | www | IP_АДРЕС_СЕРВЕРА |
+
+Замени `IP_АДРЕС_СЕРВЕРА` на реальный IP (например `193.201.126.66`).
+
+**Проверка DNS** (подожди 5–15 минут после настройки):
+```bash
+ping 105dev.online
+```
+
+Если в ответе видишь свой IP — DNS настроен правильно.
+
+---
+
+## 6. Загрузка проекта на сервер
+
+### Вариант A: Через Git (рекомендуется)
+
+На сервере:
+```bash
+cd /root
+git clone https://github.com/ТВОЙ_ЮЗЕРНЕЙМ/105site.git
+cd 105site
+```
+
+### Вариант B: Через SCP (копирование файлов)
+
+На **своём компьютере** (не на сервере):
+```bash
+scp -r "C:\Users\Ягияев Али\Desktop\105site" root@193.201.126.66:/root/105site
+```
+
+После загрузки зайди в папку проекта на сервере:
+```bash
+cd /root/105site
+```
+
+---
+
+## 7. Настройка переменных окружения
+
+На сервере, находясь в папке проекта (`/root/105site`):
+
+### 7.1. Создай файл `.env`
+
+```bash
+cp .env.example .env
+nano .env
+```
+
+### 7.2. Заполни значения
+
 ```env
-DATABASE_URL=postgresql+psycopg2://postgres:password@localhost:5432/softstudio_db
-SECRET_KEY=your-secret-key-here
+# ===== PostgreSQL =====
+POSTGRES_DB=softstudio_db
+POSTGRES_USER=softstudio_user
+POSTGRES_PASSWORD=ТУТ_ПРИДУМАЙ_СЛОЖНЫЙ_ПАРОЛЬ
+
+# ===== Backend =====
+SECRET_KEY=ТУТ_СЛУЧАЙНАЯ_СТРОКА
 ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=15
+ACCESS_TOKEN_EXPIRE_MINUTES=720
 REFRESH_TOKEN_EXPIRE_DAYS=14
+
+# ===== Frontend (build-time) =====
+API_BASE_URL=https://105dev.online/api
 ```
 
-5. Убедитесь, что PostgreSQL запущен и создана база данных:
+### 7.3. Генерация безопасного SECRET_KEY
+
+Выполни команду и скопируй результат в `.env`:
 ```bash
-createdb softstudio_db
+openssl rand -hex 32
 ```
 
-6. Выполните миграции:
+### 7.4. Генерация безопасного пароля для PostgreSQL
+
 ```bash
-python -m app.migration
+openssl rand -base64 24
 ```
 
-7. Запустите сервер:
+### 7.5. Сохранение файла
+
+В nano: нажми `Ctrl+O` → `Enter` (сохранить) → `Ctrl+X` (выйти).
+
+---
+
+## 8. Первый запуск (без SSL)
+
+SSL-сертификат нельзя получить, пока сайт не работает на порту 80. Поэтому сначала запускаем без HTTPS.
+
+### 8.1. Подставь начальный конфиг Nginx (без SSL)
+
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+cp nginx.initial.conf nginx.conf
 ```
 
-### Frontend
-
-1. Перейдите в директорию front:
+**Подожди!** Перед этим сохрани оригинальный nginx.conf с SSL:
 ```bash
-cd front
+cp nginx.conf nginx.ssl.conf
+cp nginx.initial.conf nginx.conf
 ```
 
-2. Установите зависимости:
+### 8.2. Запуск всех контейнеров
+
 ```bash
-npm install
+docker compose up -d --build
 ```
 
-3. Создайте файл `.env.local`:
-```env
-API_BASE_URL=http://localhost:8000
-```
+**Что происходит:**
+- `docker compose` — управление несколькими контейнерами
+- `up` — запустить
+- `-d` — в фоновом режиме (detached), чтобы терминал не был занят
+- `--build` — пересобрать образы из Dockerfile
 
-4. Соберите приложение:
+Первый запуск займёт **5–10 минут** (скачиваются образы, устанавливаются зависимости).
+
+### 8.3. Проверка
+
 ```bash
-npm run build
+docker compose ps
 ```
 
-5. Запустите сервер:
+Все контейнеры должны быть в статусе `Up` или `running`. Контейнер `certbot` может быть в статусе `Restarting` — это нормально, он заработает после получения сертификата.
+
+Проверь, что сайт открывается: зайди в браузере на `http://105dev.online`
+
+---
+
+## 9. Получение SSL-сертификата
+
+Когда сайт работает по HTTP, можно получить сертификат.
+
+### 9.1. Получение сертификата
+
 ```bash
-npm start
+docker compose run --rm certbot certonly \
+  --webroot \
+  --webroot-path=/var/www/certbot \
+  -d 105dev.online \
+  -d www.105dev.online \
+  --email ТВОЯ_ПОЧТА@example.com \
+  --agree-tos \
+  --no-eff-email
+```
+
+Замени `ТВОЯ_ПОЧТА@example.com` на свою реальную почту (нужна для уведомлений об истечении сертификата).
+
+Если всё прошло успешно, увидишь сообщение:
+```
+Successfully received certificate.
 ```
 
 ---
 
-## ⚙️ Настройка переменных окружения
+## 10. Переключение на HTTPS
 
-### Backend (.env в директории backend/)
+### 10.1. Верни конфиг Nginx с SSL
 
-| Переменная | Описание | Значение по умолчанию |
-|------------|----------|----------------------|
-| `DATABASE_URL` | URL подключения к PostgreSQL | `postgresql+psycopg2://postgres:postgres@localhost:5433/dagcode_db` |
-| `SECRET_KEY` | Секретный ключ для JWT токенов | **Обязательно измените!** |
-| `ALGORITHM` | Алгоритм шифрования JWT | `HS256` |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Время жизни access токена | `15` |
-| `REFRESH_TOKEN_EXPIRE_DAYS` | Время жизни refresh токена | `14` |
+```bash
+cp nginx.ssl.conf nginx.conf
+```
 
-### Frontend (.env.local в директории front/)
+### 10.2. Перезапуск Nginx
 
-| Переменная | Описание | Значение по умолчанию |
-|------------|----------|----------------------|
-| `API_BASE_URL` | URL backend API | `http://localhost:8000` |
+```bash
+docker compose restart nginx
+```
 
-### Docker Compose (.env в корне проекта)
+### 10.3. Проверка
 
-Все переменные из `env.example` можно настроить в корневом `.env` файле.
+Открой в браузере: `https://105dev.online`
+
+Должен быть замочек в адресной строке — значит SSL работает!
 
 ---
 
-## 🌐 Настройка для продакшн
+## 11. Проверка работоспособности
 
-### 1. Безопасность
+### Сайт (Frontend)
+Открой `https://105dev.online` — должна загрузиться главная страница.
 
-**КРИТИЧЕСКИ ВАЖНО:**
+### API (Backend)
+Открой `https://105dev.online/docs` — должна открыться документация API (Scalar UI).
 
-- ✅ Измените `POSTGRES_PASSWORD` на сложный пароль
-- ✅ Измените `SECRET_KEY` на случайную строку (минимум 32 символа)
-- ✅ Не коммитьте `.env` файлы в Git
-- ✅ Используйте HTTPS для продакшн
-
-Сгенерируйте безопасный SECRET_KEY:
+### База данных
 ```bash
-python -c "import secrets; print(secrets.token_urlsafe(32))"
+docker compose exec backend python -c "
+from app.database import engine
+from sqlalchemy import text
+with engine.connect() as conn:
+    result = conn.execute(text('SELECT 1'))
+    print('DB OK:', result.scalar())
+"
 ```
 
-### 2. Reverse Proxy (Nginx)
-
-Рекомендуется использовать Nginx как reverse proxy:
-
-```nginx
-# /etc/nginx/sites-available/softstudio
-server {
-    listen 80;
-    server_name yourdomain.com;
-
-    # Frontend
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-
-    # Backend API
-    location /api {
-        rewrite ^/api/(.*) /$1 break;
-        proxy_pass http://localhost:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
-### 3. SSL сертификат (Let's Encrypt)
-
+### Логи (если что-то не работает)
 ```bash
-sudo apt-get install certbot python3-certbot-nginx
-sudo certbot --nginx -d yourdomain.com
-```
-
-### 4. Обновление API_BASE_URL для Frontend
-
-В продакшн измените `API_BASE_URL` в `.env`:
-```env
-API_BASE_URL=https://api.yourdomain.com
-# или если API на том же домене:
-API_BASE_URL=https://yourdomain.com/api
-```
-
-### 5. Оптимизация Docker Compose для продакшн
-
-Измените `docker-compose.yml`:
-
-```yaml
-backend:
-  # Уберите --reload для продакшн
-  command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
-
-frontend:
-  # Next.js уже оптимизирован для продакшн
-  environment:
-    NODE_ENV: production
-```
-
-### 6. Мониторинг и логи
-
-Просмотр логов:
-```bash
-# Все сервисы
-docker-compose logs -f
-
-# Конкретный сервис
-docker-compose logs -f backend
-docker-compose logs -f frontend
-docker-compose logs -f postgres
-```
-
-### 7. Резервное копирование базы данных
-
-Создайте скрипт для бэкапа:
-```bash
-#!/bin/bash
-docker-compose exec postgres pg_dump -U postgres softstudio_db > backup_$(date +%Y%m%d_%H%M%S).sql
-```
-
-Восстановление:
-```bash
-docker-compose exec -T postgres psql -U postgres softstudio_db < backup.sql
+docker compose logs backend
+docker compose logs frontend
+docker compose logs nginx
+docker compose logs db
 ```
 
 ---
 
-## 🔍 Troubleshooting
+## 12. Обновление проекта
 
-### Проблема: Контейнеры не запускаются
+Когда ты внёс изменения в код и хочешь обновить сайт на сервере:
 
-**Решение:**
+### Вариант A: Через Git
+
+На сервере:
 ```bash
-# Проверьте логи
-docker-compose logs
-
-# Пересоберите контейнеры
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
+cd /root/105site
+git pull origin main
+docker compose up -d --build
 ```
 
-### Проблема: База данных не подключается
+### Вариант B: Через SCP
 
-**Решение:**
-1. Проверьте, что PostgreSQL контейнер запущен:
+На своём компьютере скопируй файлы, затем на сервере:
 ```bash
-docker-compose ps postgres
+cd /root/105site
+docker compose up -d --build
 ```
 
-2. Проверьте переменные окружения в `.env`:
+### Если изменения только в коде (без новых зависимостей)
+
+Пересобрать только нужный контейнер:
 ```bash
-cat .env | grep POSTGRES
+# Только бэкенд
+docker compose up -d --build backend
+
+# Только фронтенд
+docker compose up -d --build frontend
 ```
 
-3. Проверьте логи PostgreSQL:
+### Если изменения в .env
+
 ```bash
-docker-compose logs postgres
-```
-
-### Проблема: Frontend не может подключиться к Backend
-
-**Решение:**
-1. Проверьте `API_BASE_URL` в `.env` файле
-2. Убедитесь, что backend запущен:
-```bash
-curl http://localhost:8000/docs
-```
-
-3. Проверьте CORS настройки в backend (если есть)
-
-### Проблема: Миграции не выполняются
-
-**Решение:**
-```bash
-# Выполните миграции вручную
-docker-compose exec backend python -m app.migration
-```
-
-### Проблема: Порты заняты
-
-**Решение:**
-Измените порты в `.env`:
-```env
-POSTGRES_PORT=5433
-BACKEND_PORT=8001
-FRONTEND_PORT=3001
+docker compose down
+docker compose up -d
 ```
 
 ---
 
-## 📚 Полезные команды
+## 13. Полезные команды Docker
+
+### Основные
+
+| Команда | Что делает |
+|---------|-----------|
+| `docker compose up -d` | Запустить все контейнеры |
+| `docker compose down` | Остановить все контейнеры |
+| `docker compose ps` | Показать статус контейнеров |
+| `docker compose logs -f` | Показать логи в реальном времени |
+| `docker compose logs backend` | Логи конкретного контейнера |
+| `docker compose restart nginx` | Перезапустить один контейнер |
+| `docker compose up -d --build` | Пересобрать и запустить |
+
+### Работа с базой данных
 
 ```bash
-# Остановить все сервисы
-docker-compose down
+# Зайти в PostgreSQL
+docker compose exec db psql -U softstudio_user -d softstudio_db
 
-# Остановить и удалить volumes (ОСТОРОЖНО: удалит данные БД!)
-docker-compose down -v
+# Выполнить SQL-запрос
+docker compose exec db psql -U softstudio_user -d softstudio_db -c "SELECT * FROM users;"
 
-# Перезапустить конкретный сервис
-docker-compose restart backend
+# Выйти из psql
+\q
+```
 
-# Просмотр использования ресурсов
-docker stats
+### Очистка
 
-# Войти в контейнер
-docker-compose exec backend bash
-docker-compose exec postgres psql -U postgres -d softstudio_db
+```bash
+# Удалить неиспользуемые образы (освободить место)
+docker image prune -f
+
+# Полная очистка (ОСТОРОЖНО — удалит всё неиспользуемое)
+docker system prune -f
+```
+
+### Бэкап базы данных
+
+```bash
+# Создать бэкап
+docker compose exec db pg_dump -U softstudio_user softstudio_db > backup_$(date +%Y%m%d).sql
+
+# Восстановить из бэкапа
+docker compose exec -T db psql -U softstudio_user softstudio_db < backup_20260323.sql
 ```
 
 ---
 
-## 📞 Поддержка
+## 14. Устранение проблем
 
-При возникновении проблем:
-1. Проверьте логи: `docker-compose logs`
-2. Проверьте документацию в `backend/docs/`
-3. Убедитесь, что все переменные окружения установлены правильно
+### Контейнер не запускается
+
+```bash
+# Посмотри логи проблемного контейнера
+docker compose logs backend
+docker compose logs frontend
+
+# Пересобери с нуля
+docker compose down
+docker compose up -d --build --force-recreate
+```
+
+### Ошибка «port already in use»
+
+Кто-то уже занял порт. Проверь:
+```bash
+ss -tlnp | grep :80
+ss -tlnp | grep :443
+```
+
+Убей процесс или останови другой сервер на этом порту.
+
+### Ошибка подключения к БД
+
+```bash
+# Проверь, что контейнер БД запущен
+docker compose ps db
+
+# Проверь логи БД
+docker compose logs db
+
+# Проверь переменные окружения
+docker compose exec backend env | grep DATABASE
+```
+
+### Frontend не видит Backend (ошибки CORS / Network Error)
+
+1. Проверь, что в `.env` правильный `API_BASE_URL=https://105dev.online/api`
+2. Пересобери фронтенд:
+```bash
+docker compose up -d --build frontend
+```
+
+### SSL-сертификат не получается
+
+1. Убедись, что DNS настроен (пункт 5)
+2. Убедись, что порт 80 открыт и сайт доступен по HTTP
+3. Попробуй с флагом `--staging` для тестового сертификата:
+```bash
+docker compose run --rm certbot certonly \
+  --webroot \
+  --webroot-path=/var/www/certbot \
+  -d 105dev.online \
+  --email ТВОЯ_ПОЧТА@example.com \
+  --agree-tos \
+  --no-eff-email \
+  --staging
+```
+
+### Как полностью удалить всё и начать заново
+
+```bash
+docker compose down -v    # -v удаляет тома (ДАННЫЕ БУДУТ ПОТЕРЯНЫ!)
+docker compose up -d --build
+```
 
 ---
 
-**Успешного развертывания! 🚀**
+## Краткая шпаргалка (Quick Start)
+
+```bash
+# 1. Подключись к серверу
+ssh root@193.201.126.66
+
+# 2. Установи Docker
+curl -fsSL https://get.docker.com | sh
+
+# 3. Склонируй проект
+git clone https://github.com/ЮЗЕРНЕЙМ/105site.git && cd 105site
+
+# 4. Настрой .env
+cp .env.example .env && nano .env
+
+# 5. Сохрани SSL-конфиг и подставь начальный
+cp nginx.conf nginx.ssl.conf && cp nginx.initial.conf nginx.conf
+
+# 6. Запусти
+docker compose up -d --build
+
+# 7. Получи SSL
+docker compose run --rm certbot certonly --webroot --webroot-path=/var/www/certbot -d 105dev.online -d www.105dev.online --email ПОЧТА@example.com --agree-tos --no-eff-email
+
+# 8. Включи HTTPS
+cp nginx.ssl.conf nginx.conf && docker compose restart nginx
+```
+
+Готово! Сайт доступен по адресу **https://105dev.online**
