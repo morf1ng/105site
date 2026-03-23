@@ -55,7 +55,7 @@ export default function Home() {
 						</div>
 					</div>
 					<div className="about__top-right">
-						<img className="parallax-element" src="assets/images/cursor1.svg" alt=""/>
+						<img className="parallax-element" src="assets/images/cursor.svg" alt=""/>
 					</div>
 				</div>
 				<div className="about__bottom">

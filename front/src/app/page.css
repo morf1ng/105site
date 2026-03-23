@@ -288,6 +288,7 @@ header .lang {
 	cursor: pointer;
 	background: rgba(255, 255, 255, 0.02);
 	position: relative;
+	transition: 150ms all;
 }
 
 .subscription-card input[type="radio"] {
@@ -298,6 +299,7 @@ header .lang {
 	display: flex;
 	flex-direction: column;
 	gap: 0.15rem;
+	transition: 150ms all;
 }
 
 .subscription-card__title {
@@ -311,14 +313,28 @@ header .lang {
 }
 
 .subscription-card__hover {
-	margin-top: 0.25rem;
+	/* Плавное появление вместо display:none/block */
+	margin-top: 0;
+	padding-top: 0;
 	font-size: 0.8rem;
 	color: rgba(var(--light-rgb), 0.7);
-	display: none;
+	opacity: 0;
+	transform: translateY(6px);
+	max-height: 0;
+	overflow: hidden;
+	transition:
+		opacity .2s ease,
+		transform .2s ease,
+		max-height .25s ease,
+		padding-top .25s ease;
 }
 
 .subscription-card:hover .subscription-card__hover {
-	display: block;
+	margin-top: 0.25rem;
+	padding-top: 0.25rem;
+	opacity: 1;
+	transform: translateY(0);
+	max-height: 200px;
 }
 
 .modal__checkboxes {
@@ -1217,6 +1233,9 @@ header .lang {
 /* === TYPEWRITER EFFECT === */
 .typewriter-container {
 	display: block;
+	/* Prevent layout shift while typewriter grows (codeLines length = 11) */
+	height: calc(11 * 1.2em);
+	overflow: hidden;
 }
 
 .code-line {
