@@ -1,6 +1,10 @@
+from io import BytesIO
 from fastapi import APIRouter, Depends, HTTPException, status, Form
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from .models import Role, User
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+from .models import Role, User, Course, CourseRegistration
 from .schemas import Token
 from .utils import hash_password
 from .database import get_session
@@ -174,3 +178,302 @@ def delete_user(user_id: int, session: Session = Depends(get_session), user=Depe
     session.delete(user_obj)
     session.commit()
     return {"detail": "Deleted"}
+
+
+# --- Курсы (админка) ---
+@router.get("/courses")
+def get_courses_admin(session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    return session.query(Course).order_by(Course.id).all()
+
+@router.post("/courses")
+def create_course_admin(title: str = Form(...), session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    course = Course(title=title)
+    session.add(course)
+    session.commit()
+    session.refresh(course)
+    return course
+
+@router.put("/courses/{course_id}")
+def update_course_admin(course_id: int, title: str = Form(...), session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    course = session.query(Course).get(course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Курс не найден")
+    course.title = title
+    session.commit()
+    session.refresh(course)
+    return course
+
+@router.delete("/courses/{course_id}")
+def delete_course_admin(course_id: int, session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    course = session.query(Course).get(course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Курс не найден")
+    session.delete(course)
+    session.commit()
+    return {"detail": "Deleted"}
+
+@router.get("/course-registrations")
+def get_course_registrations(session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    """Список всех заявок на курсы."""
+    regs = session.query(CourseRegistration).order_by(CourseRegistration.created_at.desc()).all()
+    return [{"id": r.id, "full_name": r.full_name, "phone": r.phone, "email": r.email, "course_id": r.course_id, "course_title": r.course.title if r.course else None, "support_type": r.support_type, "created_at": str(r.created_at) if r.created_at else None} for r in regs]
+
+
+@router.get("/export/users", response_class=StreamingResponse)
+def export_users_xlsx(session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    """Экспорт пользователей в Excel."""
+    users = session.query(User).all()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Пользователи"
+    headers = ["ID", "Email", "ФИО", "Роли", "Создан"]
+    for col, h in enumerate(headers, 1):
+        ws.cell(row=1, column=col, value=h)
+    for row, u in enumerate(users, 2):
+        ws.cell(row=row, column=1, value=u.id)
+        ws.cell(row=row, column=2, value=u.email)
+        ws.cell(row=row, column=3, value=u.fullname or "")
+        ws.cell(row=row, column=4, value=u.role_ids or "")
+        ws.cell(row=row, column=5, value=str(u.created_at) if u.created_at else "")
+    for col in range(1, len(headers) + 1):
+        ws.column_dimensions[get_column_letter(col)].width = 22
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=users.xlsx"},
+    )
+
+
+@router.get("/export/course-registrations", response_class=StreamingResponse)
+def export_course_registrations_xlsx(session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    """Экспорт заявок на курсы в Excel."""
+    regs = session.query(CourseRegistration).order_by(CourseRegistration.created_at.desc()).all()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Заявки на курсы"
+    headers = ["ID", "ФИО", "Телефон", "Email", "Курс", "Тип", "Дата регистрации"]
+    for col, h in enumerate(headers, 1):
+        ws.cell(row=1, column=col, value=h)
+    for row, r in enumerate(regs, 2):
+        ws.cell(row=row, column=1, value=r.id)
+        ws.cell(row=row, column=2, value=r.full_name)
+        ws.cell(row=row, column=3, value=r.phone)
+        ws.cell(row=row, column=4, value=r.email)
+        ws.cell(row=row, column=5, value=r.course.title if r.course else "")
+        ws.cell(row=row, column=6, value="С поддержкой" if r.support_type == "with_support" else "Базовый")
+        ws.cell(row=row, column=7, value=str(r.created_at) if r.created_at else "")
+    for col in range(1, len(headers) + 1):
+        ws.column_dimensions[get_column_letter(col)].width = 18
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=course_registrations.xlsx"},
+    )
+
+
+@router.get("/export/users", response_class=StreamingResponse)
+def export_users_xlsx(session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    """Экспорт пользователей в Excel."""
+    users_list = session.query(User).all()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Пользователи"
+    headers = ["ID", "Email", "ФИО", "Роли", "Создан"]
+    for col, h in enumerate(headers, 1):
+        ws.cell(row=1, column=col, value=h)
+    for row, u in enumerate(users_list, 2):
+        ws.cell(row=row, column=1, value=u.id)
+        ws.cell(row=row, column=2, value=u.email or "")
+        ws.cell(row=row, column=3, value=u.fullname or "")
+        ws.cell(row=row, column=4, value=u.role_ids or "")
+        ws.cell(row=row, column=5, value=str(u.created_at) if u.created_at else "")
+    for col in range(1, len(headers) + 1):
+        ws.column_dimensions[get_column_letter(col)].width = 22
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=users.xlsx"},
+    )
+
+
+@router.get("/export/users", response_class=StreamingResponse)
+def export_users_xlsx(session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    """Экспорт пользователей в Excel."""
+    users = session.query(User).order_by(User.id).all()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Пользователи"
+    headers = ["ID", "Email", "Имя", "Роли", "Создан"]
+    for col, h in enumerate(headers, 1):
+        ws.cell(row=1, column=col, value=h)
+    for row, u in enumerate(users, 2):
+        ws.cell(row=row, column=1, value=u.id)
+        ws.cell(row=row, column=2, value=u.email)
+        ws.cell(row=row, column=3, value=u.fullname or "")
+        ws.cell(row=row, column=4, value=u.role_ids or "")
+        ws.cell(row=row, column=5, value=str(u.created_at) if u.created_at else "")
+    for col in range(1, len(headers) + 1):
+        ws.column_dimensions[get_column_letter(col)].width = 20
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=users.xlsx"},
+    )
+
+
+@router.get("/export/users", response_class=StreamingResponse)
+def export_users_xlsx(session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    """Экспорт пользователей в Excel."""
+    users = session.query(User).order_by(User.id).all()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Пользователи"
+    headers = ["ID", "Email", "Имя", "Роли", "Создан"]
+    for col, h in enumerate(headers, 1):
+        ws.cell(row=1, column=col, value=h)
+    for row, u in enumerate(users, 2):
+        ws.cell(row=row, column=1, value=u.id)
+        ws.cell(row=row, column=2, value=u.email or "")
+        ws.cell(row=row, column=3, value=u.fullname or "")
+        ws.cell(row=row, column=4, value=u.role_ids or "")
+        ws.cell(row=row, column=5, value=str(u.created_at) if u.created_at else "")
+    for col in range(1, len(headers) + 1):
+        ws.column_dimensions[get_column_letter(col)].width = 25
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=users.xlsx"},
+    )
+
+
+@router.get("/export/users", response_class=StreamingResponse)
+def export_users_xlsx(session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    """Экспорт пользователей в Excel."""
+    users = session.query(User).order_by(User.id).all()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Пользователи"
+    headers = ["ID", "Email", "Имя", "ID ролей", "Дата создания"]
+    for col, h in enumerate(headers, 1):
+        ws.cell(row=1, column=col, value=h)
+    for row, u in enumerate(users, 2):
+        ws.cell(row=row, column=1, value=u.id)
+        ws.cell(row=row, column=2, value=u.email or "")
+        ws.cell(row=row, column=3, value=u.fullname or "")
+        ws.cell(row=row, column=4, value=u.role_ids or "")
+        ws.cell(row=row, column=5, value=str(u.created_at) if u.created_at else "")
+    for col in range(1, len(headers) + 1):
+        ws.column_dimensions[get_column_letter(col)].width = 20
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=users.xlsx"},
+    )
+
+
+@router.get("/export/users", response_class=StreamingResponse)
+def export_users_xlsx(session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    """Экспорт пользователей в Excel."""
+    users = session.query(User).order_by(User.id).all()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Пользователи"
+    headers = ["ID", "Email", "Имя", "Роли", "Создан", "Обновлён"]
+    for col, h in enumerate(headers, 1):
+        ws.cell(row=1, column=col, value=h)
+    for row, u in enumerate(users, 2):
+        ws.cell(row=row, column=1, value=u.id)
+        ws.cell(row=row, column=2, value=u.email)
+        ws.cell(row=row, column=3, value=u.fullname or "")
+        ws.cell(row=row, column=4, value=u.role_ids or "")
+        ws.cell(row=row, column=5, value=str(u.created_at) if u.created_at else "")
+        ws.cell(row=row, column=6, value=str(u.updated_at) if u.updated_at else "")
+    for col in range(1, len(headers) + 1):
+        ws.column_dimensions[get_column_letter(col)].width = 22
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=users.xlsx"},
+    )
+
+
+@router.get("/export/users", response_class=StreamingResponse)
+def export_users_xlsx(session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    """Экспорт пользователей в Excel."""
+    users = session.query(User).order_by(User.id).all()
+    roles = {r.id: r.name for r in session.query(Role).all()}
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Пользователи"
+    headers = ["ID", "Email", "Имя", "Роли", "Дата создания"]
+    for col, h in enumerate(headers, 1):
+        ws.cell(row=1, column=col, value=h)
+    for row, u in enumerate(users, 2):
+        role_names = ", ".join(roles.get(rid, str(rid)) for rid in u.get_role_ids_list())
+        ws.cell(row=row, column=1, value=u.id)
+        ws.cell(row=row, column=2, value=u.email)
+        ws.cell(row=row, column=3, value=u.fullname or "")
+        ws.cell(row=row, column=4, value=role_names)
+        ws.cell(row=row, column=5, value=str(u.created_at) if u.created_at else "")
+    for col in range(1, len(headers) + 1):
+        ws.column_dimensions[get_column_letter(col)].width = 22
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=users.xlsx"},
+    )
+
+
+@router.get("/export/users", response_class=StreamingResponse)
+def export_users_xlsx(session: Session = Depends(get_session), user=Depends(role_required("admin"))):
+    """Экспорт пользователей в Excel."""
+    users = session.query(User).order_by(User.id).all()
+    roles = {r.id: r.name for r in session.query(Role).all()}
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Пользователи"
+    headers = ["ID", "Email", "ФИО", "Роли", "Дата создания"]
+    for col, h in enumerate(headers, 1):
+        ws.cell(row=1, column=col, value=h)
+    for row, u in enumerate(users, 2):
+        role_names = ", ".join(roles.get(rid, str(rid)) for rid in u.get_role_ids_list())
+        ws.cell(row=row, column=1, value=u.id)
+        ws.cell(row=row, column=2, value=u.email)
+        ws.cell(row=row, column=3, value=u.fullname or "")
+        ws.cell(row=row, column=4, value=role_names)
+        ws.cell(row=row, column=5, value=str(u.created_at) if u.created_at else "")
+    for col in range(1, len(headers) + 1):
+        ws.column_dimensions[get_column_letter(col)].width = 18
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=users.xlsx"},
+    )

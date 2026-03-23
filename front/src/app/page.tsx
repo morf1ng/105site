@@ -337,7 +337,7 @@ export default function Home() {
 				<div className="footer__top">
 					<div className="footer__top-left">
 						<img src="assets/icons/ss-icon-text.svg" alt="" className="logo" />
-						<div className="footer__text">ООО "105 СОФТ-СТУДИЯ"<br/>ИНН: 0500044302<br/>ОГРН: 1250500019087<br/>Юр. адрес: 367000, Республика Дагестан, г Махачкала, ул Дзержинского, д. 21</div>
+						<div className="footer__text">ООО "105 СОФТ-СТУДИЯ"<br/>ИНН: 0500044302<br/>ОГРН: 1250500019087<br/>Юр. адрес: 367000, Республика Дагестан, г Махачкала, ул Астемирова, д. 4</div>
 						<div className="footer__text"><img src="assets/icons/bloated-heart-icon.svg"/> 2025 105 СОФТ-СТУДИЯ Права защищены</div>
 						
 					</div>

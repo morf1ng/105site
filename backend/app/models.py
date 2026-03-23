@@ -115,6 +115,26 @@ class ProjectProgress(Base):
 
 
 
+class Course(Base):
+    __tablename__ = "courses"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    registrations = relationship("CourseRegistration", back_populates="course", cascade="all, delete-orphan")
+
+
+class CourseRegistration(Base):
+    __tablename__ = "course_registrations"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    full_name = Column(String, nullable=False)
+    phone = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    course_id = Column(Integer, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    support_type = Column(String(20), nullable=False)  # 'basic' | 'with_support'
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    course = relationship("Course", back_populates="registrations")
+
+
 class Role(Base):
     __tablename__ = "roles"
     id = Column(Integer, primary_key=True)

@@ -8,11 +8,11 @@ http://localhost:8000
 
 ## Интерактивная документация
 
-Swagger UI доступен по адресу: `http://localhost:8000/docs`
+Scalar API Reference доступен по адресу: `http://localhost:8000/docs`
 
 ## Аутентификация
 
-В текущей версии аутентификация не требуется.
+Для большинства эндпоинтов аутентификация не требуется. Эндпоинты админки требуют заголовок `Authorization: Bearer <access_token>` и роль `admin`.
 
 ---
 
@@ -22,7 +22,7 @@ Swagger UI доступен по адресу: `http://localhost:8000/docs`
 
 #### 1. Создать проект
 
-**POST** `/projects`
+**POST** `/api/projects`
 
 Создание нового проекта со всеми вложенными сущностями.
 
@@ -44,236 +44,143 @@ Swagger UI доступен по адресу: `http://localhost:8000/docs`
 | `stages` | string (JSON) | ✅ | Массив этапов проекта |
 | `result` | string (JSON) | ✅ | Результат проекта |
 | `progress` | string (JSON) | ✅ | Массив показателей прогресса |
-| `stage_imgs` | file[] | ❌ | Изображения этапов (порядок должен соответствовать массиву `stages`) |
-| `result_imgs` | file[] | ❌ | Изображения результатов (соответствуют `result.images`) |
-
-**Формат JSON-полей:**
-
-**about_company:**
-```json
-{
-  "title": "ООО DagCode",
-  "description": "Описание компании"
-}
-```
-
-**stages:**
-```json
-[
-  {
-    "title": "Этап 1",
-    "description": "Описание этапа",
-    "img": "image.png"
-  }
-]
-```
-
-**result:**
-```json
-{
-  "title": "Результат проекта",
-  "description": "Описание результата",
-  "images": [
-    {
-      "type": "notebook",
-      "img": "image.png"
-    }
-  ]
-}
-```
-
-**progress:**
-```json
-[
-  {
-    "digit": 1,
-    "text": "Начало проекта"
-  }
-]
-```
-
-**Пример ответа:**
-```json
-{
-  "id": 1,
-  "title": "Тестовый проект",
-  "url": "https://example.com",
-  "preview_img": "preview.png",
-  "tablet_img": "tablet.png",
-  "smartphone_img": "smartphone.png",
-  "main_img": "main.png",
-  "target": "Цель проекта",
-  "task": "Задача проекта",
-  "about_company": {
-    "title": "ООО DagCode",
-    "description": "Описание компании"
-  },
-  "stages": [
-    {
-      "title": "Этап 1",
-      "description": "Описание этапа",
-      "img": "stages/stage1.png"
-    }
-  ],
-  "result": {
-    "title": "Результат проекта",
-    "description": "Описание результата",
-    "images": [
-      {
-        "type": "notebook",
-        "img": "results/result1.png"
-      }
-    ]
-  },
-  "progress": [
-    {
-      "digit": 1,
-      "text": "Начало проекта"
-    }
-  ]
-}
-```
+| `stage_imgs` | file[] | ❌ | Изображения этапов |
+| `result_imgs` | file[] | ❌ | Изображения результатов |
 
 ---
 
 #### 2. Получить список проектов
 
-**GET** `/projects`
+**GET** `/api/projects`
 
 Возвращает краткую информацию о всех проектах.
-
-**Пример ответа:**
-```json
-[
-  {
-    "id": 1,
-    "title": "Тестовый проект"
-  },
-  {
-    "id": 2,
-    "title": "Другой проект"
-  }
-]
-```
 
 ---
 
 #### 3. Получить проект по ID
 
-**GET** `/projects/{project_id}`
+**GET** `/api/projects/{project_id}`
 
-Возвращает полную информацию о проекте со всеми вложенными сущностями.
-
-**Параметры пути:**
-
-| Параметр | Тип | Описание |
-|----------|-----|----------|
-| `project_id` | integer | ID проекта |
-
-**Пример ответа:**
-```json
-{
-  "id": 1,
-  "title": "Тестовый проект",
-  "url": "https://example.com",
-  "preview_img": "preview.png",
-  "tablet_img": "tablet.png",
-  "smartphone_img": "smartphone.png",
-  "main_img": "main.png",
-  "target": "Цель проекта",
-  "task": "Задача проекта",
-  "about_company": {
-    "title": "ООО DagCode",
-    "description": "Описание компании"
-  },
-  "stages": [
-    {
-      "title": "Этап 1",
-      "description": "Описание этапа",
-      "img": "stage1.png"
-    }
-  ],
-  "result": {
-    "title": "Результат",
-    "description": "Описание результата",
-    "images": [
-      {
-        "type": "notebook",
-        "img": "result1.png"
-      }
-    ]
-  },
-  "progress": [
-    {
-      "digit": 1,
-      "text": "Начало проекта"
-    }
-  ]
-}
-```
+Возвращает полную информацию о проекте.
 
 ---
 
 #### 4. Обновить проект
 
-**PUT** `/projects/{project_id}`
+**PUT** `/api/projects/{project_id}`
 
-Полное обновление проекта со всеми вложенными сущностями. Все вложенные данные пересоздаются.
-
-**Content-Type**: `multipart/form-data`
-
-**Параметры пути:**
-
-| Параметр | Тип | Описание |
-|----------|-----|----------|
-| `project_id` | integer | ID проекта |
-
-**Параметры запроса:** (аналогично POST `/projects`)
-
-**Пример ответа:**
-```json
-{
-  "id": 1,
-  "title": "Тестовый проект",
-  "...": "см. структуру POST /projects"
-}
-```
+Полное обновление проекта. **Content-Type**: `multipart/form-data`
 
 ---
 
 #### 5. Удалить проект
 
-**DELETE** `/projects/{project_id}`
+**DELETE** `/api/projects/{project_id}`
 
-Удаляет проект и все связанные данные (каскадное удаление).
+Удаляет проект и все связанные данные.
 
-**Параметры пути:**
+---
 
-| Параметр | Тип | Описание |
-|----------|-----|----------|
-| `project_id` | integer | ID проекта |
+## Courses (Курсы)
+
+### 1. Список курсов (публичный)
+
+**GET** `/api/courses`
+
+Возвращает список всех курсов для выбора в форме регистрации. Аутентификация не требуется.
 
 **Пример ответа:**
 ```json
+[
+  {"id": 1, "title": "Python для начинающих", "created_at": "2025-03-16T12:00:00"},
+  {"id": 2, "title": "Веб-разработка", "created_at": "2025-03-16T12:00:00"}
+]
+```
+
+---
+
+### 2. Регистрация на курс (публичный)
+
+**POST** `/api/courses/register`
+
+**Content-Type**: `application/json`
+
+Сохраняет заявку в БД и отправляет на email пользователя письмо со ссылками на Telegram-каналы.
+
+**Тело запроса:**
+```json
 {
-  "detail": "Deleted"
+  "full_name": "Иванов Иван Иванович",
+  "phone": "+7 (999) 123-45-67",
+  "email": "user@example.com",
+  "course_id": 1,
+  "support_type": "basic"
+}
+```
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `full_name` | string | ФИО |
+| `phone` | string | Номер телефона |
+| `email` | string | Email (на него придёт письмо со ссылками) |
+| `course_id` | integer | ID курса из GET /api/courses |
+| `support_type` | string | `"basic"` — 1 ссылка на TG; `"with_support"` — 2 ссылки на TG |
+
+**Ответ:**
+```json
+{
+  "detail": "Заявка принята. Письмо со ссылками отправлено на указанный email.",
+  "id": 1
 }
 ```
 
 ---
 
-## Статические файлы
+## Admin — Курсы (требуется Bearer токен admin)
 
-### Получить изображение
+**Заголовок:** `Authorization: Bearer <access_token>`
+
+| Метод | URL | Описание |
+|-------|-----|----------|
+| GET | `/api/admin/courses` | Список курсов |
+| POST | `/api/admin/courses` | Создать курс (Form: `title`) |
+| PUT | `/api/admin/courses/{course_id}` | Обновить курс (Form: `title`) |
+| DELETE | `/api/admin/courses/{course_id}` | Удалить курс |
+| GET | `/api/admin/course-registrations` | Список всех заявок на курсы |
+
+**POST/PUT:** Content-Type `application/x-www-form-urlencoded`, параметр `title` — название курса.
+
+---
+
+## Admin — Экспорт в Excel
+
+### Скачать таблицу заявок на курсы
+
+**GET** `/api/admin/export/course-registrations`
+
+Экспортирует все заявки на курсы в файл Excel (.xlsx).
+
+**Требуется:** заголовок `Authorization: Bearer <access_token>` (роль admin).
+
+**Ответ:**
+- Content-Type: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+- Заголовок `Content-Disposition: attachment; filename=course_registrations.xlsx`
+- Файл содержит колонки: ID, ФИО, Телефон, Email, Курс, Тип (Базовый/С поддержкой), Дата регистрации
+
+**Пример использования:**
+```
+GET /api/admin/export/course-registrations
+Authorization: Bearer <ваш_access_token>
+```
+Браузер или клиент автоматически скачает файл `course_registrations.xlsx`.
+
+---
+
+## Статические файлы
 
 **GET** `/uploads/{filename}`
 
 Возвращает загруженное изображение.
-
-**Пример:**
-```
-GET /uploads/preview.png
-```
 
 ---
 
@@ -284,14 +191,7 @@ GET /uploads/preview.png
 | `200` | Успешный запрос |
 | `201` | Ресурс создан |
 | `400` | Неверный запрос (валидация) |
+| `401` | Не авторизован |
+| `403` | Доступ запрещён |
 | `404` | Ресурс не найден |
 | `500` | Внутренняя ошибка сервера |
-
----
-
-**Примеры ошибок:**
-
-- `400 Bad Request`: Невалидный JSON в одном из полей
-- `404 Not Found`: Проект с указанным ID не найден
-- `500 Internal Server Error`: Внутренняя ошибка сервера
-

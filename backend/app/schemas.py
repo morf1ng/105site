@@ -1,4 +1,3 @@
-import token
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -58,3 +57,22 @@ class UserUpdate(BaseModel):
     password: Optional[str] = None
     fullname: Optional[str] = None
     role_ids: Optional[List[int]] = None
+
+
+# Курсы и заявки
+class CourseIn(BaseModel):
+    title: str
+
+class CourseOut(BaseModel):
+    id: int
+    title: str
+
+    class Config:
+        from_attributes = True
+
+class CourseRegistrationIn(BaseModel):
+    full_name: str
+    phone: str
+    email: str
+    course_id: int
+    support_type: str  # 'basic' | 'with_support'
