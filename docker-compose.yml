@@ -57,7 +57,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - certbot_data:/etc/letsencrypt:ro
-      - certbot_www:/var/www/certbot:ro
+      - certbot_www:/var/www/certbot
     healthcheck:
       test: ["CMD", "nginx", "-t"]
       interval: 30s
