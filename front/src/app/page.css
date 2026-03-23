@@ -314,6 +314,11 @@ header .lang {
 	margin-top: 0.25rem;
 	font-size: 0.8rem;
 	color: rgba(var(--light-rgb), 0.7);
+	display: none;
+}
+
+.subscription-card:hover .subscription-card__hover {
+	display: block;
 }
 
 .modal__checkboxes {

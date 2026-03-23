@@ -455,6 +455,61 @@ export async function deleteUserOnApi(userId: number | string) {
   return res.json();
 }
 
+// ===== Courses (public) =====
+
+export type ApiCourse = {
+  id: number;
+  title: string;
+  created_at?: string | null;
+};
+
+export type CourseSupportType = 'basic' | 'with_support';
+
+export type CourseRegistrationRequest = {
+  full_name: string;
+  phone: string;
+  email: string;
+  course_id: number;
+  support_type: CourseSupportType;
+};
+
+export type CourseRegistrationResponse = {
+  detail: string;
+  id: number;
+};
+
+// Получить список курсов (GET /api/courses)
+export async function fetchCoursesFromApi(): Promise<ApiCourse[]> {
+  return apiJson<ApiCourse[]>('/courses');
+}
+
+// Регистрация на курс (POST /api/courses/register)
+export async function registerCourseOnApi(
+  request: CourseRegistrationRequest
+): Promise<CourseRegistrationResponse> {
+  const token = getAccessToken();
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE_URL}/courses/register`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(request),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Course registration failed ${res.status}: ${res.statusText}${text ? ` – ${text.slice(0, 200)}` : ''}`);
+  }
+
+  return res.json();
+}
+
 // ===== Debug =====
 
 // Получить список таблиц БД (GET /tables)

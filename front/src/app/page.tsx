@@ -34,7 +34,7 @@ export default function Home() {
 					<a href="#!" className="hero__left-link">Обсудить проект</a>
 				</div>
 				<div className="hero__right">
-          <Typewriter />
+          		<Typewriter />
 				</div>
 			</div>
 		</section>
