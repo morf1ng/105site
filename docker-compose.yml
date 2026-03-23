@@ -46,7 +46,7 @@ services:
     networks:
       - softstudio_network
     restart: unless-stopped
-    command: sh -c "python -m app.migration && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    command: sh -c "python -m app.migration && uvicorn app.main:app --host 0.0.0.0 --port 8000 --limit-max-requests 1000 --limit-concurrency 1000 --timeout-keep-alive 300"
 
   # Frontend (Next.js)
   frontend:

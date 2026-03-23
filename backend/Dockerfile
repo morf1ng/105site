@@ -50,7 +50,8 @@ ENV ENV=production
 EXPOSE 8000
 
 # Команда для запуска FastAPI с помощью uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Increased limits for large file uploads (100MB max body size)
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--limit-max-requests", "1000", "--limit-concurrency", "1000", "--timeout-keep-alive", "300"]
 
 # Выполняем миграции и запускаем приложение
 # Вместо прямого вызова uvicorn используется команда sh -c, которая сначала выполняет миграции alembic upgrade head, а затем запускает uvicorn.

@@ -144,6 +144,12 @@ header .call-btn {
 	font-weight: bold;
 }
 
+header .call-btn--secondary {
+	background-color: transparent;
+	border: 1px solid rgba(var(--accent-rgb), .8);
+	color: var(--light);
+}
+
 header .lang {
 	padding: 12px 17px;
 	border: 1px solid var(--accent);
@@ -180,6 +186,188 @@ header .lang {
 .hero__left-subtitle {
 	font-size: 20px;
 	color: rgba(var(--light-rgb), .8);
+}
+
+/* === GLOBAL MODAL FOR LANDING (APPLY FORM) === */
+
+.modal-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.6);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1500;
+}
+
+.modal {
+	background: rgba(var(--dark-rgb), 0.98);
+	border-radius: 0.75em;
+	padding: 2em;
+	width: 100%;
+	max-width: 520px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+	border: 1px solid rgba(var(--light-rgb), 0.16);
+	/* тонкий неоновый кант, чтобы модалка отделялась от фона */
+	box-shadow:
+		0 0 0 1px rgba(var(--accent-light-rgb), 0.4),
+		0 18px 45px rgba(0, 0, 0, 0.8);
+	color: var(--light);
+	box-sizing: border-box;
+}
+
+.modal__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1em;
+}
+
+.modal__title {
+	margin: 0;
+	font-size: 1.4rem;
+	font-weight: 600;
+	color: var(--light);
+}
+
+.modal__close {
+	background: transparent;
+	border: none;
+	font-size: 1.4rem;
+	cursor: pointer;
+	line-height: 1;
+	color: rgba(var(--light-rgb), 0.6);
+}
+
+.modal__form {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.modal__label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	font-size: 0.9rem;
+	color: rgba(var(--light-rgb), 0.9);
+}
+
+.modal__input,
+.modal__select-input {
+	width: 100%;
+	padding: 0.6em 0.75em;
+	border-radius: 0.5em;
+	border: 1px solid rgba(var(--light-rgb), 0.14);
+	font-size: 0.95rem;
+	outline: none;
+	background: rgba(var(--dark-rgb), 0.9);
+	color: var(--light);
+}
+
+.modal__input:focus,
+.modal__select-input:focus {
+	border-color: rgba(var(--accent-rgb), .9);
+	box-shadow: 0 0 0 1px rgba(var(--accent-rgb), .3);
+}
+
+.subscription-options {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	margin-top: 0.5rem;
+}
+
+.subscription-card {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+	padding: 0.6rem 0.75rem;
+	border-radius: 0.75rem;
+	border: 1px solid rgba(var(--light-rgb), 0.12);
+	cursor: pointer;
+	background: rgba(255, 255, 255, 0.02);
+	position: relative;
+}
+
+.subscription-card input[type="radio"] {
+	margin-top: 0.2rem;
+}
+
+.subscription-card__content {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+}
+
+.subscription-card__title {
+	font-weight: 600;
+	font-size: 0.9rem;
+}
+
+.subscription-card__price {
+	font-size: 0.9rem;
+	color: rgba(var(--light-rgb), 0.85);
+}
+
+.subscription-card__hover {
+	margin-top: 0.25rem;
+	font-size: 0.8rem;
+	color: rgba(var(--light-rgb), 0.7);
+	display: none;
+}
+
+.subscription-card:hover .subscription-card__hover {
+	display: block;
+}
+
+.modal__checkboxes {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin-top: 0.5rem;
+	font-size: 0.8rem;
+	color: rgba(var(--light-rgb), 0.8);
+}
+
+.modal__checkbox {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.4rem;
+}
+
+.modal__checkbox input[type="checkbox"] {
+	margin-top: 0.1rem;
+}
+
+.modal__checkbox a {
+	color: rgba(var(--accent-rgb), 1);
+	text-decoration: underline;
+}
+
+.modal__actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.75rem;
+	margin-top: 1rem;
+}
+
+.modal__button {
+	border-radius: 0.6rem;
+	padding: 0.6rem 1.4rem;
+	font-size: 0.95rem;
+	border: none;
+	cursor: pointer;
+}
+
+.modal__button--secondary {
+	background: rgba(255, 255, 255, 0.08);
+	color: var(--light);
+}
+
+.modal__button--primary {
+	background: rgba(var(--accent-rgb), 0.95);
+	color: #fff;
 }
 
 .hero__left-link {
@@ -395,16 +583,20 @@ header .lang {
 	padding: 24px 0;
 	font-size: 16px;
 	color: rgba(var(--light-rgb), .6);
-	transition: .5s ease-in-out;
+	background-color: rgba(var(--dark-rgb), .24);
+	transition: background-color .25s ease-out, transform .25s ease-out, box-shadow .25s ease-out, color .25s ease-out;
+	will-change: transform, background-color;
 }
 
 .doing__bottom-card:hover {
-	color: var(--dark);
-	background-color: var(--light);
+	color: rgba(var(--light-rgb), .95);
+	background-color: rgba(var(--light-rgb), 0.08);
+	transform: translateY(-4px);
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
 }
 
 .doing__bottom-card:hover .line {
-	background-color: rgba(var(--dark-rgb), .6);
+	background-color: rgba(var(--accent-dark-rgb), .6);
 }
 
 .doing__bottom-card-title,
@@ -543,8 +735,9 @@ header .lang {
 .work-process__right-card {
 	flex: 1;
 	padding: 24px 24px;
-	background-color: rgba(var(--dark-rgb), .16);
-	transition: .5s ease-in-out;
+	background-color: rgba(var(--dark-rgb), .24);
+	transition: background-color .25s ease-out, transform .25s ease-out, box-shadow .25s ease-out;
+	will-change: transform, background-color;
 
 	display: flex;
 	gap: 52px;
@@ -560,37 +753,36 @@ header .lang {
 .work-process__right-card-subtitle {
 	font-size: 20px;
 	margin-top: auto;
-	transition: transform .5s ease-in-out, opacity .5s ease-in-out; /* Добавляю transition для сдвига */
+	transition: opacity .25s ease-out; /* облегчённый hover, без тяжёлых transform */
 }
 
 .work-process__right-card-subtitle-2 {
 	font-size: 16px;
 	margin: 10px 0 0;
-	position: absolute; /* Делаю absolute */
-	bottom: -50px; /* Изначально за пределами снизу, скорректировать по высоте текста */
+	position: absolute;
+	bottom: 24px; /* фиксированная позиция, без анимированного bottom */
 	left: 24px;
 	right: 24px;
 	opacity: 0;
-	transition: bottom .5s ease-in-out, opacity .5s ease-in-out;
+	transition: opacity .25s ease-out;
 }
 
 .work-process__right-card:hover {
-	background-color: rgba(var(--light-rgb), .86);
-	color: var(--dark);
-
+	background-color: rgba(var(--light-rgb), 0.08);
+	color: var(--light);
+	transform: translateY(-4px);
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
 }
 
 .work-process__right-card:hover .work-process__right-card-title {
-	color: var(--accent);
+	color: var(--accent-light);
 }
 
 .work-process__right-card:hover .work-process__right-card-subtitle {
-	transform: translateY(-40px); /* Сдвиг вверх, скорректировать по высоте subtitle-2 */
-	opacity: 0;
+	opacity: 0; /* только плавное исчезновение без сдвига макета */
 }
 
 .work-process__right-card:hover .work-process__right-card-subtitle-2 {
-	bottom: 24px; /* Поднимаем на уровень padding снизу */
 	opacity: 1;
 }
 
@@ -617,7 +809,8 @@ header .lang {
 	flex: 1;
 	padding: 30px 0px;
 	background-color: rgba(var(--dark-rgb), .2);
-	transition: .5s ease-in-out;
+	transition: background-color .25s ease-out, transform .25s ease-out, box-shadow .25s ease-out, color .25s ease-out;
+	will-change: transform, background-color;
 }
 
 .team__card-img {
@@ -649,12 +842,14 @@ header .lang {
 }
 
 .team__card:hover {
-	background-color: var(--light);
-	color: var(--dark);
+	background-color: rgba(var(--light-rgb), 0.08);
+	color: var(--light);
+	transform: translateY(-4px);
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
 }
 
 .team__card:hover .team__card-subtitle {
-	color: var(--dark);
+	color: rgba(var(--light-rgb), 0.9);
 }
 
 .team__card:hover .line {
@@ -932,6 +1127,8 @@ header .lang {
 
 .contacts__right-contacts div img {
 	color: #27C93F;
+	width: 40px;
+	height: 40px;
 	padding: 7px;
 	border-radius: 5px;
 	background-color: rgba(var(--accent-light-rgb), .24);
@@ -1558,6 +1755,7 @@ header .lang {
 
 		.f-e-faq-mob {
 			display: block;
+			width: 100%;
 		}
 
 		.contacts__container,

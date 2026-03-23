@@ -4,10 +4,10 @@ export type ApiProject = {
   url: string;
   target: string;
   task: string;
-  about_company: string | null;
-  stages: string | null;
-  result: string | null;
-  progress: string | null;
+  about_company: string | { title: string; description: string } | null;
+  stages: string | Array<{ title: string; description: string; img: string | null }> | null;
+  result: string | { description: string; images: Array<{ type: string; img: string | null }> } | null;
+  progress: string | Array<{ digit: number; text: string }> | null;
   preview_img: string | null;
   notebook_img: string | null;
   main_img: string | null;
@@ -70,22 +70,20 @@ export type UpdateUserRequest = {
   role_ids?: string; // comma-separated role IDs
 };
 
-const BASE_URL = (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '').replace(/\/api$/, '');
-const API_BASE_URL = typeof window !== 'undefined' ? '/api' : `${BASE_URL}/api`;
+const BASE_URL = ('http://localhost:8000').replace(/\/$/, '').replace(/\/api$/, '');
+const API_BASE_URL = `${BASE_URL}/api`;
 
 export const getImageUrl = (path: string | null) => {
   if (!path) return '';
+  // If it's already a full URL or blob URL, return as-is
   if (path.startsWith('http') || path.startsWith('blob:')) return path;
+  // If it's an asset path, return as-is
   if (path.startsWith('/assets') || path.startsWith('assets/')) {
     return path.startsWith('/') ? path : `/${path}`;
   }
   
-  // В браузере картинки грузим через относительный путь /uploads/...
-  if (typeof window !== 'undefined') {
-    return `/uploads/${path.replace(/^\//, '')}`;
-  }
-  
-  // На сервере (SSR) используем полный путь бэкенда
+  // Always use full backend URL for uploads (both client and server)
+  // This ensures images are loaded from the backend server
   return `${BASE_URL}/uploads/${path.replace(/^\//, '')}`;
 };
 
@@ -321,6 +319,33 @@ export async function refreshTokenOnApi(
   return apiFormUrlEncoded<RefreshTokenResponse>('/auth/refresh', request);
 }
 
+/** Decode JWT payload (no verification; used only to read user_id for display). */
+function decodeJwtPayload(token: string): { user_id?: number } | null {
+  try {
+    const parts = token.replace(/^Bearer\s+/i, '').trim().split('.');
+    if (parts.length !== 3) return null;
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const json = typeof atob !== 'undefined' ? atob(base64) : Buffer.from(base64, 'base64').toString('utf8');
+    return JSON.parse(json) as { user_id?: number };
+  } catch {
+    return null;
+  }
+}
+
+/** Get the currently signed-in user (uses user_id from JWT + GET /admin/users/{user_id}). */
+export async function getCurrentUserFromApi(): Promise<ApiUser | null> {
+  const token = getAccessToken();
+  if (!token) return null;
+  const payload = decodeJwtPayload(token);
+  const userId = payload?.user_id;
+  if (userId == null) return null;
+  try {
+    return await fetchUserFromApi(userId);
+  } catch {
+    return null;
+  }
+}
+
 // ===== Admin Roles =====
 
 // Получить список ролей (GET /admin/roles)
@@ -425,6 +450,61 @@ export async function deleteUserOnApi(userId: number | string) {
         text ? ` – ${text.slice(0, 200)}` : ''
       }`
     );
+  }
+
+  return res.json();
+}
+
+// ===== Courses (public) =====
+
+export type ApiCourse = {
+  id: number;
+  title: string;
+  created_at?: string | null;
+};
+
+export type CourseSupportType = 'basic' | 'with_support';
+
+export type CourseRegistrationRequest = {
+  full_name: string;
+  phone: string;
+  email: string;
+  course_id: number;
+  support_type: CourseSupportType;
+};
+
+export type CourseRegistrationResponse = {
+  detail: string;
+  id: number;
+};
+
+// Получить список курсов (GET /api/courses)
+export async function fetchCoursesFromApi(): Promise<ApiCourse[]> {
+  return apiJson<ApiCourse[]>('/courses');
+}
+
+// Регистрация на курс (POST /api/courses/register)
+export async function registerCourseOnApi(
+  request: CourseRegistrationRequest
+): Promise<CourseRegistrationResponse> {
+  const token = getAccessToken();
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE_URL}/courses/register`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(request),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Course registration failed ${res.status}: ${res.statusText}${text ? ` – ${text.slice(0, 200)}` : ''}`);
   }
 
   return res.json();

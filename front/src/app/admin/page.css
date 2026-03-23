@@ -753,6 +753,12 @@ input[type="checkbox"] {
     color: #00000080;
 }
 
+.modal__loading-text {
+    padding: 1rem;
+    text-align: center;
+    color: #00000080;
+}
+
 .modal__select {
     margin-top: 0.25em;
     padding: 0.6em 0.75em;

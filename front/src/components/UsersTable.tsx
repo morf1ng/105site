@@ -1,5 +1,5 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react'
-import { fetchUsersFromApi, createUserOnApi, updateUserOnApi, deleteUserOnApi, fetchRolesFromApi, type ApiUser, type ApiRole } from '@/lib/api'
+import { useState, useEffect, FormEvent } from 'react'
+import { fetchUsersFromApi, createUserOnApi, updateUserOnApi, deleteUserOnApi, fetchRolesFromApi, fetchUserFromApi, type ApiUser, type ApiRole } from '@/lib/api'
 
 type UserDisplay = {
     id: number
@@ -26,6 +26,14 @@ const UsersTable = () => {
     const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([])
     const [isSaving, setIsSaving] = useState(false)
     const [loading, setLoading] = useState(true)
+
+    const [editUserId, setEditUserId] = useState<number | null>(null)
+    const [editEmail, setEditEmail] = useState('')
+    const [editFullName, setEditFullName] = useState('')
+    const [editPassword, setEditPassword] = useState('')
+    const [editRoleIds, setEditRoleIds] = useState<number[]>([])
+    const [editRoleSelectOpen, setEditRoleSelectOpen] = useState(false)
+    const [editLoading, setEditLoading] = useState(false)
 
     // Helper to convert ApiUser to UserDisplay
     const apiUserToDisplay = (apiUser: ApiUser, rolesMap: Map<number, string>): UserDisplay => {
@@ -103,8 +111,61 @@ const UsersTable = () => {
     }
 
     const handleEdit = async (id: number) => {
-        // TODO: Implement edit functionality (could open a modal similar to create)
-        console.log('Edit user:', id)
+        try {
+            setEditLoading(true)
+            const user = await fetchUserFromApi(id)
+            setEditEmail(user.email)
+            setEditFullName(user.fullname || '')
+            setEditPassword('')
+            setEditRoleIds(
+                user.role_ids
+                    ? user.role_ids.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n))
+                    : []
+            )
+            setEditUserId(id)
+        } catch (err) {
+            console.error('Не удалось загрузить пользователя', err)
+            alert('Не удалось загрузить пользователя')
+        } finally {
+            setEditLoading(false)
+        }
+    }
+
+    const handleCloseEdit = () => {
+        if (isSaving) return
+        setEditUserId(null)
+        setEditRoleSelectOpen(false)
+    }
+
+    const toggleEditRole = (roleId: number) => {
+        setEditRoleIds(prev =>
+            prev.includes(roleId)
+                ? prev.filter(id => id !== roleId)
+                : [...prev, roleId]
+        )
+    }
+
+    const handleEditSubmit = async (e: FormEvent) => {
+        e.preventDefault()
+        if (editUserId == null || !editEmail.trim() || editRoleIds.length === 0) return
+
+        try {
+            setIsSaving(true)
+            await updateUserOnApi(editUserId, {
+                email: editEmail.trim(),
+                fullname: editFullName.trim() || undefined,
+                role_ids: editRoleIds.join(','),
+                ...(editPassword.trim() ? { password: editPassword.trim() } : {}),
+            })
+            handleCloseEdit()
+            const rolesList = await loadRoles()
+            await loadUsers(rolesList)
+        } catch (err) {
+            console.error('Не удалось обновить пользователя', err)
+            alert('Не удалось обновить пользователя')
+        } finally {
+            setIsSaving(false)
+        }
     }
 
     const handleDelete = async (id: number) => {
@@ -128,6 +189,11 @@ const UsersTable = () => {
         selectedRoleIds.length === 0
             ? 'Выберите роль'
             : selectedRoleIds.map(id => roles.find(r => r.id === id)?.name || `Role ${id}`).join(', ')
+
+    const combinedEditRoleLabel =
+        editRoleIds.length === 0
+            ? 'Выберите роль'
+            : editRoleIds.map(id => roles.find(r => r.id === id)?.name || `Role ${id}`).join(', ')
 
     const handleOpenCreate = () => {
         setNewEmail('')
@@ -413,6 +479,113 @@ const UsersTable = () => {
                                         !newEmail.trim() ||
                                         !newPassword.trim() ||
                                         selectedRoleIds.length === 0
+                                    }
+                                >
+                                    {isSaving ? 'Сохранение...' : 'Сохранить'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {editLoading && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <div className="modal__header">
+                            <h2 className="modal__title">Редактирование пользователя</h2>
+                        </div>
+                        <p className="modal__loading-text">Загрузка...</p>
+                    </div>
+                </div>
+            )}
+
+            {editUserId != null && !editLoading && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <div className="modal__header">
+                            <h2 className="modal__title">Редактировать пользователя</h2>
+                            <button
+                                type="button"
+                                className="modal__close"
+                                onClick={handleCloseEdit}
+                                aria-label="Закрыть"
+                                disabled={isSaving}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <form className="modal__form" onSubmit={handleEditSubmit}>
+                            <label className="modal__label">
+                                Email
+                                <input
+                                    className="modal__input"
+                                    type="email"
+                                    value={editEmail}
+                                    onChange={(e) => setEditEmail(e.target.value)}
+                                    placeholder="example@gmail.ru"
+                                    required
+                                />
+                            </label>
+                            <label className="modal__label">
+                                ФИО
+                                <input
+                                    className="modal__input"
+                                    type="text"
+                                    value={editFullName}
+                                    onChange={(e) => setEditFullName(e.target.value)}
+                                    placeholder="Иванов Иван Иванович"
+                                />
+                            </label>
+                            <label className="modal__label">
+                                Роль
+                                <div className="modal__select" onClick={() => setEditRoleSelectOpen(prev => !prev)}>
+                                    <span className="modal__select-label">
+                                        {combinedEditRoleLabel}
+                                    </span>
+                                    <span className="modal__select-arrow">▾</span>
+                                </div>
+                                {editRoleSelectOpen && (
+                                    <div className="modal__select-dropdown">
+                                        {roles.map(role => (
+                                            <label key={role.id} className="modal__checkbox-option">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={editRoleIds.includes(role.id)}
+                                                    onChange={() => toggleEditRole(role.id)}
+                                                />
+                                                <span>{role.name}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
+                            </label>
+                            <label className="modal__label">
+                                Новый пароль (оставьте пустым, чтобы не менять)
+                                <input
+                                    className="modal__input"
+                                    type="password"
+                                    value={editPassword}
+                                    onChange={(e) => setEditPassword(e.target.value)}
+                                    placeholder="Оставьте пустым, чтобы не менять"
+                                />
+                            </label>
+                            <div className="modal__actions">
+                                <button
+                                    type="button"
+                                    className="modal__button modal__button--secondary"
+                                    onClick={handleCloseEdit}
+                                    disabled={isSaving}
+                                >
+                                    Отменить
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="modal__button modal__button--primary"
+                                    disabled={
+                                        isSaving ||
+                                        !editEmail.trim() ||
+                                        editRoleIds.length === 0
                                     }
                                 >
                                     {isSaving ? 'Сохранение...' : 'Сохранить'}

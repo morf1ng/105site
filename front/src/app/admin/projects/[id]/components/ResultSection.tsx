@@ -1,9 +1,16 @@
 import { Project } from '@/lib/mockData';
 import { useRef, useEffect } from 'react';
+import { compressImage } from '@/lib/imageUtils';
 
 type ResultSectionProps = {
   project: Project;
-  onUpdate: (updates: Partial<Project>) => void;
+  onUpdate: (updates: Partial<Project>, fileUpdates?: {
+    preview_img?: File;
+    main_img?: File;
+    notebook_img?: File;
+    stage_imgs?: { index: number; file: File }[];
+    result_imgs?: { index: number; file: File }[];
+  }) => void;
 };
 
 const ResultSection = ({ project, onUpdate }: ResultSectionProps) => {
@@ -34,44 +41,95 @@ const ResultSection = ({ project, onUpdate }: ResultSectionProps) => {
     image2InputRef.current?.click();
   };
 
-  const handleImage1Change = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImage1Change = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      const updatedImages = [...project.result.images];
-      if (updatedImages.length > 0) {
-        updatedImages[0] = { ...updatedImages[0], img: imageUrl };
-      } else {
-        updatedImages.push({ type: 'result', img: imageUrl });
-      }
-      onUpdate({
-        result: {
-          ...project.result,
-          images: updatedImages
+      try {
+        // Compress image before upload (1920px max, 90% quality - high quality)
+        const compressedFile = await compressImage(file, 1920, 1920, 0.9);
+        const imageUrl = URL.createObjectURL(compressedFile);
+        const updatedImages = [...project.result.images];
+        if (updatedImages.length > 0) {
+          updatedImages[0] = { ...updatedImages[0], img: imageUrl };
+        } else {
+          updatedImages.push({ type: 'result', img: imageUrl });
         }
-      });
+        onUpdate({
+          result: {
+            ...project.result,
+            images: updatedImages
+          }
+        }, {
+          result_imgs: [{ index: 0, file: compressedFile }]
+        });
+      } catch (error) {
+        console.error('Error processing image:', error);
+        // Fallback to original file
+        const imageUrl = URL.createObjectURL(file);
+        const updatedImages = [...project.result.images];
+        if (updatedImages.length > 0) {
+          updatedImages[0] = { ...updatedImages[0], img: imageUrl };
+        } else {
+          updatedImages.push({ type: 'result', img: imageUrl });
+        }
+        onUpdate({
+          result: {
+            ...project.result,
+            images: updatedImages
+          }
+        }, {
+          result_imgs: [{ index: 0, file }]
+        });
+      }
     }
   };
 
-  const handleImage2Change = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImage2Change = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      const updatedImages = [...project.result.images];
-      if (updatedImages.length > 1) {
-        updatedImages[1] = { ...updatedImages[1], img: imageUrl };
-      } else if (updatedImages.length === 1) {
-        updatedImages.push({ type: 'result', img: imageUrl });
-      } else {
-        updatedImages.push({ type: 'result', img: imageUrl });
-        updatedImages.push({ type: 'result', img: imageUrl });
-      }
-      onUpdate({
-        result: {
-          ...project.result,
-          images: updatedImages
+      try {
+        // Compress image before upload (1920px max, 90% quality - high quality)
+        const compressedFile = await compressImage(file, 1920, 1920, 0.9);
+        const imageUrl = URL.createObjectURL(compressedFile);
+        const updatedImages = [...project.result.images];
+        if (updatedImages.length > 1) {
+          updatedImages[1] = { ...updatedImages[1], img: imageUrl };
+        } else if (updatedImages.length === 1) {
+          updatedImages.push({ type: 'result', img: imageUrl });
+        } else {
+          updatedImages.push({ type: 'result', img: imageUrl });
+          updatedImages.push({ type: 'result', img: imageUrl });
         }
-      });
+        onUpdate({
+          result: {
+            ...project.result,
+            images: updatedImages
+          }
+        }, {
+          result_imgs: [{ index: 1, file: compressedFile }]
+        });
+      } catch (error) {
+        console.error('Error processing image:', error);
+        // Fallback to original file
+        const imageUrl = URL.createObjectURL(file);
+        const updatedImages = [...project.result.images];
+        if (updatedImages.length > 1) {
+          updatedImages[1] = { ...updatedImages[1], img: imageUrl };
+        } else if (updatedImages.length === 1) {
+          updatedImages.push({ type: 'result', img: imageUrl });
+        } else {
+          updatedImages.push({ type: 'result', img: imageUrl });
+          updatedImages.push({ type: 'result', img: imageUrl });
+        }
+        onUpdate({
+          result: {
+            ...project.result,
+            images: updatedImages
+          }
+        }, {
+          result_imgs: [{ index: 1, file }]
+        });
+      }
     }
   };
 
