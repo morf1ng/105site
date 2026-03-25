@@ -1,4 +1,4 @@
-
+import Link from 'next/link'
 
 const Footer = () => {
     return <footer className="footer">
@@ -15,6 +15,11 @@ const Footer = () => {
                 
             </div>
             <div className="footer__top-right">
+                <nav className="footer__legal-links" aria-label="Юридические документы">
+                    <Link href="/docs/privacy">Политика обработки персональных данных</Link>
+                    <Link href="/docs/offer">Публичная оферта</Link>
+                    <Link href="/docs/contract">Договор об оказании услуг</Link>
+                </nav>
                 <a className="footer__top-right-tel" href="tel:">8 (888) 888 88 88</a>
                 <div className="adress">
                     367000, Республика Дагестан, г Махачкала, ул Астемирова, д. 4

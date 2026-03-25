@@ -47,37 +47,42 @@ const Header = () => {
         )
     }, [contractChecked, email, offerChecked, fullName, phone, policyChecked, selectedCourseId, submitLoading])
 
+    // Scroll lock + сброс сообщений формы (без coursesLoading в deps — иначе эффект дёргается и мигает селект)
     useEffect(() => {
         if (!isApplyOpen) return
-
-        // prevent body scroll while modal is open
         document.body.classList.add('no-scroll')
-
-        // reset status and load courses if needed
         setSubmitError(null)
         setSubmitSuccess(null)
-
-        const needsLoad = courses.length === 0 && !coursesLoading
-        if (needsLoad) {
-            ;(async () => {
-                try {
-                    setCoursesLoading(true)
-                    setCoursesError(null)
-                    const list = await fetchCoursesFromApi()
-                    setCourses(list)
-                } catch (e: any) {
-                    console.error('Failed to load courses', e)
-                    setCoursesError('Не удалось загрузить курсы. Попробуйте позже.')
-                } finally {
-                    setCoursesLoading(false)
-                }
-            })()
-        }
-
         return () => {
             document.body.classList.remove('no-scroll')
         }
-    }, [courses.length, coursesLoading, isApplyOpen])
+    }, [isApplyOpen])
+
+    // Загрузка курсов только при открытой модалке и пустом списке
+    useEffect(() => {
+        if (!isApplyOpen || courses.length > 0) return
+
+        let cancelled = false
+        ;(async () => {
+            try {
+                setCoursesLoading(true)
+                setCoursesError(null)
+                const list = await fetchCoursesFromApi()
+                if (!cancelled) setCourses(list)
+            } catch (e: unknown) {
+                console.error('Failed to load courses', e)
+                if (!cancelled) {
+                    setCoursesError('Не удалось загрузить курсы. Попробуйте позже.')
+                }
+            } finally {
+                if (!cancelled) setCoursesLoading(false)
+            }
+        })()
+
+        return () => {
+            cancelled = true
+        }
+    }, [isApplyOpen, courses.length])
 
     const resetForm = () => {
         setFullName('')
@@ -272,7 +277,14 @@ const Header = () => {
                                 />
                             </label>
                             <label className="modal__label">
-                                Направление обучения
+                                <span className="modal__label-row">
+                                    Направление обучения
+                                    {coursesLoading && (
+                                        <span className="modal__field-hint" aria-live="polite">
+                                            Загрузка…
+                                        </span>
+                                    )}
+                                </span>
                                 <select
                                     className="modal__select-input"
                                     name="course"
@@ -282,10 +294,9 @@ const Header = () => {
                                         setSelectedCourseId(v ? Number(v) : null)
                                     }}
                                     disabled={coursesLoading || !!coursesError}
+                                    aria-busy={coursesLoading}
                                 >
-                                    <option value="">
-                                        {coursesLoading ? 'Загрузка курсов...' : 'Выберите курс'}
-                                    </option>
+                                    <option value="">Выберите курс</option>
                                     {courses.map((c) => (
                                         <option key={c.id} value={c.id}>
                                             {c.title}
