@@ -75,4 +75,5 @@ volumes:
   postgres_data:
   uploads_data:
   certbot_data:
+    external: true
   certbot_www:
