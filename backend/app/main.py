@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from sqlalchemy import text
 from .database import get_session
 from fastapi.staticfiles import StaticFiles

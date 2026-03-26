@@ -70,7 +70,10 @@ export type UpdateUserRequest = {
   role_ids?: string; // comma-separated role IDs
 };
 
-const BASE_URL = ('http://localhost:8000').replace(/\/$/, '').replace(/\/api$/, '');
+// Backend URL: из .env.local (NEXT_PUBLIC_API_BASE_URL) или localhost:8000 по умолчанию
+const BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000')
+  .replace(/\/$/, '')
+  .replace(/\/api$/, '');
 const API_BASE_URL = `${BASE_URL}/api`;
 
 export const getImageUrl = (path: string | null) => {

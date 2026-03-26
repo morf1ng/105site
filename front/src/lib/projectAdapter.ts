@@ -29,28 +29,25 @@ export function apiProjectToProject(api: ApiProject): Project {
     about_company = { title: '', description: '' };
   }
 
-  // Backend returns stages as array, not JSON string
-  let stages: Project['stages'];
+  // Backend returns stages as array or JSON string (img can be null)
+  type ApiStage = { title: string; description: string; img: string | null };
+  let rawStages: ApiStage[];
   if (typeof api.stages === 'string') {
-    stages = safeJsonParse<Project['stages']>(api.stages, []);
+    rawStages = safeJsonParse<ApiStage[]>(api.stages, []) ?? [];
   } else if (Array.isArray(api.stages)) {
-    stages = api.stages;
+    rawStages = api.stages;
   } else {
-    stages = [];
+    rawStages = [];
   }
-  
-  stages = stages.map(stage => {
-    // Handle both null and empty string cases
-    const imgPath = stage?.img;
+
+  const stages: Project['stages'] = rawStages.map(stage => {
+    const imgPath = stage?.img ?? '';
     if (imgPath && imgPath.trim() !== '') {
-      const convertedUrl = getImageUrl(imgPath);
-      console.log(`[Adapter] Converting stage image: "${imgPath}" -> "${convertedUrl}"`);
       return {
         ...stage,
-        img: convertedUrl
+        img: getImageUrl(imgPath)
       };
     }
-    console.log(`[Adapter] Stage image is empty or null: "${imgPath}"`);
     return {
       ...stage,
       img: ''

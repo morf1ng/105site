@@ -1,0 +1,113 @@
+/* Страницы юридических документов: читабельный текст на тёмном фоне */
+
+/* Без page.css у body остаётся дефолтный margin и белый фон — визуально «белая рамка» */
+html:has(.docs-page),
+body:has(.docs-page) {
+	margin: 0;
+	padding: 0;
+	background-color: #0a0a0c;
+}
+
+.docs-page {
+	min-height: 100vh;
+	min-height: 100dvh;
+	margin: 0;
+	border: none;
+	outline: none;
+	box-shadow: none;
+	padding: 2rem 1.25rem 3rem;
+	background: #0a0a0c;
+	color: rgba(255, 255, 255, 0.92);
+	font-family: var(--font-raleway), "Raleway", system-ui, sans-serif;
+	line-height: 1.65;
+	font-size: 1rem;
+}
+
+.docs-page__inner {
+	max-width: 42rem;
+	margin: 0 auto;
+	border: none;
+	outline: none;
+}
+
+.docs-page__back {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	margin-bottom: 1.75rem;
+	font-size: 0.9rem;
+	font-weight: 500;
+	color: #c9b8ff;
+	text-decoration: none;
+	border-bottom: 1px solid transparent;
+	transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.docs-page__back:hover,
+.docs-page__back:focus-visible {
+	color: #e8ddff;
+	border-bottom-color: rgba(232, 221, 255, 0.45);
+	outline: none;
+}
+
+.docs-page__title {
+	margin: 0 0 0.35rem;
+	font-size: clamp(1.5rem, 4vw, 1.85rem);
+	font-weight: 700;
+	line-height: 1.25;
+	color: #fff;
+	letter-spacing: -0.02em;
+}
+
+.docs-page__updated {
+	margin: 0 0 2rem;
+	font-size: 0.85rem;
+	color: rgba(255, 255, 255, 0.5);
+}
+
+.docs-page__content h2 {
+	margin: 2rem 0 0.65rem;
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: #f0ecff;
+	line-height: 1.35;
+}
+
+.docs-page__content h2:first-child {
+	margin-top: 0;
+}
+
+.docs-page__content p {
+	margin: 0 0 1rem;
+	color: rgba(255, 255, 255, 0.88);
+}
+
+.docs-page__content ul,
+.docs-page__content ol {
+	margin: 0 0 1rem;
+	padding-left: 1.35rem;
+	color: rgba(255, 255, 255, 0.86);
+}
+
+.docs-page__content li {
+	margin-bottom: 0.45rem;
+}
+
+.docs-page__content a {
+	color: #b8a0ff;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	text-decoration-thickness: 1px;
+	transition: color 0.15s ease;
+}
+
+.docs-page__content a:hover,
+.docs-page__content a:focus-visible {
+	color: #e4d9ff;
+	outline: none;
+}
+
+.docs-page__content strong {
+	color: #fff;
+	font-weight: 600;
+}

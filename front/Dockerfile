@@ -1,32 +1,30 @@
-# Указываем базовый образ
-FROM node:20
-
-# Устанавливаем рабочую директорию
+FROM node:20-alpine AS deps
 WORKDIR /app
-
-# Аргумент для API_BASE_URL (передается при сборке)
-ARG API_BASE_URL=http://localhost:8000
-
-# Копируем package.json и package-lock.json (если он есть)
 COPY package*.json ./
+RUN npm ci --only=production
 
-# Устанавливаем зависимости
-RUN npm install
-
-# Копируем все файлы проекта в контейнер
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
 COPY . .
 
-# Устанавливаем переменную окружения для сборки
+ARG API_BASE_URL=http://backend:8000
 ENV API_BASE_URL=$API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$API_BASE_URL
 ENV NODE_ENV=production
-ENV PORT=3000
 
-# Собираем приложение
 RUN npm run build
 
-# Указываем порт, который будет использоваться
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=3000
+
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
 EXPOSE 3000
 
-# Команда для запуска приложения
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
