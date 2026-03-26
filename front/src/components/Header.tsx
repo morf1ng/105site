@@ -5,6 +5,50 @@ import BurgerMenu from "./listeners/BurgerMenu"
 import HeaderHide from "./listeners/HeaderHide"
 import { fetchCoursesFromApi, registerCourseOnApi, type ApiCourse, type CourseSupportType } from '@/lib/api'
 
+const ProfileIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20 21a8 8 0 0 0-16 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M12 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+    </svg>
+)
+
+const PhoneIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.11 4.18 2 2 0 0 1 4.09 2h3a2 2 0 0 1 2 1.72c.12.86.3 1.7.54 2.52a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.56-1.09a2 2 0 0 1 2.11-.45c.82.24 1.66.42 2.52.54A2 2 0 0 1 22 16.92Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+    </svg>
+)
+
+const MailIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="2" />
+        <path d="m22 6-10 7L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+)
+
+const StudyHatIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M22 10 12 5 2 10l10 5 10-5Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M6 12v5c0 1.66 3.58 3 6 3s6-1.34 6-3v-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M2 10v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M22 10v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+)
+
+const WalletIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M16 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M16 12a1 1 0 1 0 0 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M20 7V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+)
+
 const Header = () => {
     const [isApplyOpen, setIsApplyOpen] = useState(false)
 
@@ -240,58 +284,78 @@ const Header = () => {
                         <form className="modal__form" onSubmit={handleSubmit}>
                             <label className="modal__label">
                                 ФИО
-                                <input
-                                    className="modal__input"
-                                    type="text"
-                                    name="fullname"
-                                    value={fullName}
-                                    onChange={(ev) => setFullName(ev.target.value)}
-                                    placeholder="Иванов Иван Иванович"
-                                />
+                                <div className="modal__control">
+                                    <span className="modal__field-icon" aria-hidden="true">
+                                        <ProfileIcon />
+                                    </span>
+                                    <input
+                                        className="modal__input"
+                                        type="text"
+                                        name="fullname"
+                                        value={fullName}
+                                        onChange={(ev) => setFullName(ev.target.value)}
+                                        placeholder="Иванов Иван Иванович"
+                                    />
+                                </div>
                             </label>
                             <label className="modal__label">
                                 Номер телефона
-                                <input
-                                    className="modal__input"
-                                    type="tel"
-                                    name="phone"
-                                    value={phone}
-                                    onChange={(ev) => setPhone(ev.target.value)}
-                                    placeholder="+7 (999) 999-99-99"
-                                />
+                                <div className="modal__control">
+                                    <span className="modal__field-icon" aria-hidden="true">
+                                        <PhoneIcon />
+                                    </span>
+                                    <input
+                                        className="modal__input"
+                                        type="tel"
+                                        name="phone"
+                                        value={phone}
+                                        onChange={(ev) => setPhone(ev.target.value)}
+                                        placeholder="+7 (999) 999-99-99"
+                                    />
+                                </div>
                             </label>
                             <label className="modal__label">
                                 E-mail
-                                <input
-                                    className="modal__input"
-                                    type="email"
-                                    name="email"
-                                    value={email}
-                                    onChange={(ev) => setEmail(ev.target.value)}
-                                    placeholder="example@gmail.com"
-                                />
+                                <div className="modal__control">
+                                    <span className="modal__field-icon" aria-hidden="true">
+                                        <MailIcon />
+                                    </span>
+                                    <input
+                                        className="modal__input"
+                                        type="email"
+                                        name="email"
+                                        value={email}
+                                        onChange={(ev) => setEmail(ev.target.value)}
+                                        placeholder="example@gmail.com"
+                                    />
+                                </div>
                             </label>
                             <label className="modal__label">
                                 Направление обучения
-                                <select
-                                    className="modal__select-input"
-                                    name="course"
-                                    value={selectedCourseId ?? ''}
-                                    onChange={(ev) => {
-                                        const v = ev.target.value
-                                        setSelectedCourseId(v ? Number(v) : null)
-                                    }}
-                                    disabled={coursesLoading || !!coursesError}
-                                >
-                                    <option value="">
-                                        {coursesLoading ? 'Загрузка курсов...' : 'Выберите курс'}
-                                    </option>
-                                    {courses.map((c) => (
-                                        <option key={c.id} value={c.id}>
-                                            {c.title}
+                                <div className="modal__control">
+                                    <span className="modal__field-icon" aria-hidden="true">
+                                        <StudyHatIcon />
+                                    </span>
+                                    <select
+                                        className="modal__select-input"
+                                        name="course"
+                                        value={selectedCourseId ?? ''}
+                                        onChange={(ev) => {
+                                            const v = ev.target.value
+                                            setSelectedCourseId(v ? Number(v) : null)
+                                        }}
+                                        disabled={coursesLoading || !!coursesError}
+                                    >
+                                        <option value="">
+                                            {coursesLoading ? 'Загрузка курсов...' : 'Выберите курс'}
                                         </option>
-                                    ))}
-                                </select>
+                                        {courses.map((c) => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.title}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </label>
 
                             <div className="modal__label">
@@ -312,10 +376,10 @@ const Header = () => {
                                             <div className="subscription-card__price">
                                                 5 000 ₽/мес
                                             </div>
+                                        </div>
                                             <div className="subscription-card__hover">
                                                 Доступ к записям уроков и материалам, без личного наставника.
                                             </div>
-                                        </div>
                                     </label>
 
                                     <label className="subscription-card">
@@ -411,7 +475,10 @@ const Header = () => {
                                     className="modal__button modal__button--primary"
                                     disabled={!canSubmit}
                                 >
-                                    {submitLoading ? 'Отправляем...' : 'Получить доступ и оплатить'}
+                                    <WalletIcon />
+                                    <span>
+                                        {submitLoading ? 'Отправляем...' : 'Получить доступ и оплатить'}
+                                    </span>
                                 </button>
                             </div>
                         </form>

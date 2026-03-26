@@ -166,6 +166,7 @@ export default function Home() {
 					иделают всё на высшем уровне.</div>
 				<div className="team__cards">
 					<div className="team__card glass-border">
+						
 						<div className="team__card-img"><img src="assets/images/avatar.svg" alt=""/></div>
 						<div className="line"></div>
 						<div className="team__card-title">Магомедов Магомед</div>
