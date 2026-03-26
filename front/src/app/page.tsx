@@ -55,7 +55,7 @@ export default function Home() {
 						</div>
 					</div>
 					<div className="about__top-right">
-						<img className="parallax-element" src="assets/images/cursor1.svg" alt=""/>
+						<img className="parallax-element" src="assets/images/cursor.svg" alt=""/>
 					</div>
 				</div>
 				<div className="about__bottom">
@@ -166,6 +166,7 @@ export default function Home() {
 					иделают всё на высшем уровне.</div>
 				<div className="team__cards">
 					<div className="team__card glass-border">
+						
 						<div className="team__card-img"><img src="assets/images/avatar.svg" alt=""/></div>
 						<div className="line"></div>
 						<div className="team__card-title">Магомедов Магомед</div>

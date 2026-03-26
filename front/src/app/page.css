@@ -202,7 +202,7 @@ header .lang {
 
 .modal {
 	background: rgba(var(--dark-rgb), 0.98);
-	border-radius: 0.75em;
+	border-radius: 1.15em;
 	padding: 2em;
 	width: 100%;
 	max-width: 520px;
@@ -273,12 +273,12 @@ header .lang {
 .modal__input,
 .modal__select-input {
 	width: 100%;
-	padding: 0.6em 0.75em;
-	border-radius: 0.5em;
-	border: 1px solid rgba(var(--light-rgb), 0.14);
+	padding: 1em 1em;
+	border: none;
+	border-radius: 1em;
 	font-size: 0.95rem;
 	outline: none;
-	background: rgba(var(--dark-rgb), 0.9);
+	background: none;
 	color: var(--light);
 	box-sizing: border-box;
 	min-height: 2.75rem;
@@ -288,13 +288,15 @@ header .lang {
 .modal__input:focus,
 .modal__select-input:focus {
 	border-color: rgba(var(--accent-rgb), .9);
+
 	box-shadow: 0 0 0 1px rgba(var(--accent-rgb), .3);
 }
 
 .subscription-options {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	gap: 0.75rem;
+	align-items: stretch;
 	margin-top: 0.5rem;
 }
 
@@ -303,21 +305,34 @@ header .lang {
 	align-items: flex-start;
 	gap: 0.75rem;
 	padding: 0.6rem 0.75rem;
-	border-radius: 0.75rem;
-	border: 1px solid rgba(var(--light-rgb), 0.12);
+	border-radius: 1em;
+	border: 1px solid rgba(var(--light-rgb), 0.30);
 	cursor: pointer;
 	background: rgba(255, 255, 255, 0.02);
 	position: relative;
+	transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 
 .subscription-card input[type="radio"] {
-	margin-top: 0.2rem;
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+	width: 0;
+	height: 0;
+}
+
+.subscription-card:has(input[type="radio"]:checked) {
+	border-color: rgba(var(--accent-rgb), 1);
+	box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.55);
 }
 
 .subscription-card__content {
 	display: flex;
 	flex-direction: column;
 	gap: 0.15rem;
+	transition: 150ms all;
+	width: 100%;
+	box-sizing: border-box;
 }
 
 .subscription-card__title {
@@ -331,20 +346,72 @@ header .lang {
 }
 
 .subscription-card__hover {
-	margin-top: 0.25rem;
+	/* Плавное появление вместо display:none/block */
+	border-radius: 1em;
+	border: 1px solid rgba(var(--light-rgb), 0.30);
+	background: rgba(var(--dark-rgb), 0.9);
+
+	gap: 0.75rem;
+	padding: 0.6rem 0.75rem;
+	left: -1px;
+	width: calc(100% + 2px);
+	box-sizing: border-box;
+
+	position: absolute;
+	top: 100%;
+	margin-top: 0;
+	padding-top: 0;
 	font-size: 0.8rem;
 	color: rgba(var(--light-rgb), 0.7);
-	display: none;
+	opacity: 0;
+	transform: translateY(-20px);
+	max-height: 0;
+	overflow: hidden;
+	transition:
+		opacity .2s ease,
+		transform .2s ease,
+		max-height .25s ease,
+		padding-top .25s ease;
+}
+
+.subscription-card:hover {
+	border-bottom-right-radius: 0 !important;
+	border-bottom-left-radius: 0 !important;
+	box-shadow: none !important;
+	border-bottom: none !important;
+}
+.subscription-card:has(input[type="radio"]:checked):hover .subscription-card__hover {
+	padding-top: 0.25rem;
+	opacity: 1;
+	transform: translateY(0);
+	max-height: 200px;
+
+	border-top-right-radius: 0 !important;
+	border-top-left-radius: 0 !important;
+	border-top: none !important;
+	box-shadow: none !important;
+
+	border-color: rgba(var(--accent-rgb), 1);
+	box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.55);
+
 }
 
 .subscription-card:hover .subscription-card__hover {
-	display: block;
+	padding-top: 0.25rem;
+	opacity: 1;
+	transform: translateY(0);
+	max-height: 200px;
+
+	border-top-right-radius: 0 !important;
+	border-top-left-radius: 0 !important;
+	border-top: none !important;
+	box-shadow: none !important;
 }
 
 .modal__checkboxes {
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
+	gap: 1rem;
 	margin-top: 0.5rem;
 	font-size: 0.8rem;
 	color: rgba(var(--light-rgb), 0.8);
@@ -352,14 +419,21 @@ header .lang {
 
 .modal__checkbox {
 	display: flex;
-	align-items: flex-start;
+	align-items: center;
 	gap: 0.4rem;
 }
 
 .modal__checkbox input[type="checkbox"] {
-	margin-top: 0.1rem;
+	width: 20px;
+	height: 20px;
+	margin-top: 0.15rem;
+	border-radius: 50%;
+	accent-color: rgb(var(--accent-rgb));
 }
 
+.modal__checkbox span {
+	font-size: 14px;
+}
 .modal__checkbox a {
 	color: #c9b8ff;
 	text-decoration: underline;
@@ -388,6 +462,10 @@ header .lang {
 }
 
 .modal__button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.6rem;
 	border-radius: 0.6rem;
 	padding: 0.6rem 1.4rem;
 	font-size: 0.95rem;
@@ -1349,6 +1427,9 @@ header .lang {
 /* === TYPEWRITER EFFECT === */
 .typewriter-container {
 	display: block;
+	/* Prevent layout shift while typewriter grows (codeLines length = 11) */
+	height: calc(11 * 1.2em);
+	overflow: hidden;
 }
 
 .code-line {
@@ -1552,11 +1633,10 @@ header .lang {
 		width: 100%;
 	}
 
-	@media screen and (max-width:1100px) {
+	@media screen and (max-width:1208px) {
 
 		/* HEADER */
-		header .menu,
-		header .call-btn {
+		header .menu {
 			display: none;
 		}
 
