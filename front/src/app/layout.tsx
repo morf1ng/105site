@@ -28,8 +28,8 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: 'assets/imaegs/ss-icon.svg',
-        href: "assets/images/ss-icon.svg",
+        url: 'assets/images/ss-logo.svg',
+        href: "assets/images/ss-logo.svg",
       }
     ]
   }

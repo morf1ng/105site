@@ -627,7 +627,7 @@ header .lang {
 	color: rgba(var(--light-rgb), .95);
 	background-color: rgba(var(--light-rgb), 0.08);
 	transform: translateY(-4px);
-	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+	box-shadow: 0 0px 10px rgba(0, 10, 0, 0.6);
 }
 
 .doing__bottom-card:hover .line {
@@ -806,7 +806,7 @@ header .lang {
 	background-color: rgba(var(--light-rgb), 0.08);
 	color: var(--light);
 	transform: translateY(-4px);
-	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+	box-shadow: 0 0px 10px rgba(0, 0, 0, 0.6);
 }
 
 .work-process__right-card:hover .work-process__right-card-title {
@@ -880,7 +880,7 @@ header .lang {
 	background-color: rgba(var(--light-rgb), 0.08);
 	color: var(--light);
 	transform: translateY(-4px);
-	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+	box-shadow: 0 0px 10px rgba(0, 0, 0, 0.6);
 }
 
 .team__card:hover .team__card-subtitle {
