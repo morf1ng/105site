@@ -360,13 +360,8 @@ const Header = () => {
                                         <option key={c.id} value={c.id}>
                                             {c.title}
                                         </option>
-                                        {courses.map((c) => (
-                                            <option key={c.id} value={c.id}>
-                                                {c.title}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                    ))}
+                                </select>
                             </label>
 
                             <div className="modal__label">
