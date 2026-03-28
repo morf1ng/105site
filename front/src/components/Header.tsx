@@ -1,9 +1,15 @@
 'use client'
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, type FormEvent } from "react"
 import BurgerMenu from "./listeners/BurgerMenu"
 import HeaderHide from "./listeners/HeaderHide"
-import { fetchCoursesFromApi, registerCourseOnApi, type ApiCourse, type CourseSupportType } from '@/lib/api'
+import {
+    fetchCoursesFromApi,
+    registerCourseOnApi,
+    submitCallbackRequest,
+    type ApiCourse,
+    type CourseSupportType,
+} from '@/lib/api'
 
 const ProfileIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -51,6 +57,7 @@ const WalletIcon = () => (
 
 const Header = () => {
     const [isApplyOpen, setIsApplyOpen] = useState(false)
+    const [isCallOpen, setIsCallOpen] = useState(false)
 
     const [courses, setCourses] = useState<ApiCourse[]>([])
     const [coursesLoading, setCoursesLoading] = useState(false)
@@ -70,12 +77,30 @@ const Header = () => {
     const [submitError, setSubmitError] = useState<string | null>(null)
     const [submitSuccess, setSubmitSuccess] = useState<string | null>(null)
 
+    const [callFullName, setCallFullName] = useState('')
+    const [callPhone, setCallPhone] = useState('')
+    const [callEmail, setCallEmail] = useState('')
+    const [callPolicyChecked, setCallPolicyChecked] = useState(false)
+    const [callOfferChecked, setCallOfferChecked] = useState(false)
+    const [callContractChecked, setCallContractChecked] = useState(false)
+    const [callSubmitLoading, setCallSubmitLoading] = useState(false)
+    const [callSubmitError, setCallSubmitError] = useState<string | null>(null)
+    const [callSubmitSuccess, setCallSubmitSuccess] = useState<string | null>(null)
+
     const openApply = () => {
         setIsApplyOpen(true)
     }
 
     const closeApply = () => {
         setIsApplyOpen(false)
+    }
+
+    const openCall = () => {
+        setIsCallOpen(true)
+    }
+
+    const closeCall = () => {
+        setIsCallOpen(false)
     }
 
     const canSubmit = useMemo(() => {
@@ -87,46 +112,77 @@ const Header = () => {
             policyChecked &&
             offerChecked &&
             contractChecked &&
-            !submitLoading
+            !submitLoading &&
+            !coursesLoading &&
+            !coursesError &&
+            courses.length > 0
         )
-    }, [contractChecked, email, offerChecked, fullName, phone, policyChecked, selectedCourseId, submitLoading])
+    }, [
+        contractChecked,
+        courses.length,
+        coursesError,
+        coursesLoading,
+        email,
+        offerChecked,
+        fullName,
+        phone,
+        policyChecked,
+        selectedCourseId,
+        submitLoading,
+    ])
 
-    // Scroll lock + сброс сообщений формы (без coursesLoading в deps — иначе эффект дёргается и мигает селект)
+    const canSubmitCall = useMemo(() => {
+        return (
+            callFullName.trim().length > 0 &&
+            callPhone.trim().length > 0 &&
+            callEmail.trim().length > 0 &&
+            callPolicyChecked &&
+            callOfferChecked &&
+            callContractChecked &&
+            !callSubmitLoading
+        )
+    }, [
+        callContractChecked,
+        callEmail,
+        callFullName,
+        callOfferChecked,
+        callPhone,
+        callPolicyChecked,
+        callSubmitLoading,
+    ])
+
     useEffect(() => {
-        if (!isApplyOpen) return
-        document.body.classList.add('no-scroll')
-        setSubmitError(null)
-        setSubmitSuccess(null)
+        if (isApplyOpen || isCallOpen) {
+            document.body.classList.add('no-scroll')
+        } else {
+            document.body.classList.remove('no-scroll')
+        }
         return () => {
             document.body.classList.remove('no-scroll')
         }
-    }, [isApplyOpen])
+    }, [isApplyOpen, isCallOpen])
 
-    // Загрузка курсов только при открытой модалке и пустом списке
     useEffect(() => {
-        if (!isApplyOpen || courses.length > 0) return
+        if (!isApplyOpen) return
 
-        let cancelled = false
+        setSubmitError(null)
+        setSubmitSuccess(null)
+        setSelectedCourseId(null)
+
         ;(async () => {
             try {
                 setCoursesLoading(true)
                 setCoursesError(null)
                 const list = await fetchCoursesFromApi()
-                if (!cancelled) setCourses(list)
+                setCourses(list)
             } catch (e: unknown) {
                 console.error('Failed to load courses', e)
-                if (!cancelled) {
-                    setCoursesError('Не удалось загрузить курсы. Попробуйте позже.')
-                }
+                setCoursesError('Не удалось загрузить курсы. Попробуйте позже.')
             } finally {
-                if (!cancelled) setCoursesLoading(false)
+                setCoursesLoading(false)
             }
         })()
-
-        return () => {
-            cancelled = true
-        }
-    }, [isApplyOpen, courses.length])
+    }, [isApplyOpen])
 
     const resetForm = () => {
         setFullName('')
@@ -146,7 +202,52 @@ const Header = () => {
         resetForm()
     }
 
-    const handleSubmit = async (e: any) => {
+    const resetCallForm = () => {
+        setCallFullName('')
+        setCallPhone('')
+        setCallEmail('')
+        setCallPolicyChecked(false)
+        setCallOfferChecked(false)
+        setCallContractChecked(false)
+        setCallSubmitError(null)
+        setCallSubmitSuccess(null)
+    }
+
+    const handleCallClose = () => {
+        closeCall()
+        resetCallForm()
+    }
+
+    const handleCallSubmit = async (e: FormEvent) => {
+        e.preventDefault()
+        if (!canSubmitCall) return
+
+        try {
+            setCallSubmitLoading(true)
+            setCallSubmitError(null)
+            setCallSubmitSuccess(null)
+
+            const res = await submitCallbackRequest({
+                full_name: callFullName.trim(),
+                phone: callPhone.trim(),
+                email: callEmail.trim(),
+            })
+            setCallSubmitSuccess(res.detail || 'Заявка принята.')
+
+            setTimeout(() => {
+                handleCallClose()
+            }, 1200)
+        } catch (err: unknown) {
+            console.error('Callback request failed', err)
+            setCallSubmitError(
+                err instanceof Error ? err.message : 'Не удалось отправить заявку.'
+            )
+        } finally {
+            setCallSubmitLoading(false)
+        }
+    }
+
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault()
         if (!canSubmit) return
         if (selectedCourseId == null) return
@@ -171,9 +272,11 @@ const Header = () => {
             setTimeout(() => {
                 handleClose()
             }, 1200)
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Course registration failed', err)
-            setSubmitError(err?.message || 'Не удалось отправить заявку.')
+            setSubmitError(
+                err instanceof Error ? err.message : 'Не удалось отправить заявку.'
+            )
         } finally {
             setSubmitLoading(false)
         }
@@ -213,7 +316,9 @@ const Header = () => {
                         </nav>
                     </div>
                     <div className="call">
-                        <a href="#!" className="call-btn">Заказать звонок</a>
+                        <button type="button" className="call-btn" onClick={openCall}>
+                            Заказать звонок
+                        </button>
                         <button
                             type="button"
                             className="call-btn call-btn--secondary"
@@ -336,33 +441,42 @@ const Header = () => {
                                 </div>
                             </label>
                             <label className="modal__label">
-                                <span className="modal__label-row">
-                                    Направление обучения
-                                    {coursesLoading && (
-                                        <span className="modal__field-hint" aria-live="polite">
-                                            Загрузка…
-                                        </span>
-                                    )}
-                                </span>
-                                <select
-                                    className="modal__select-input"
-                                    name="course"
-                                    value={selectedCourseId ?? ''}
-                                    onChange={(ev) => {
-                                        const v = ev.target.value
-                                        setSelectedCourseId(v ? Number(v) : null)
-                                    }}
-                                    disabled={coursesLoading || !!coursesError}
-                                    aria-busy={coursesLoading}
-                                >
-                                    <option value="">Выберите курс</option>
-                                    {courses.map((c) => (
-                                        <option key={c.id} value={c.id}>
-                                            {c.title}
+                                Направление обучения
+                                <div className="modal__control">
+                                    <span className="modal__field-icon" aria-hidden="true">
+                                        <StudyHatIcon />
+                                    </span>
+                                    <select
+                                        className="modal__select-input"
+                                        name="course"
+                                        value={selectedCourseId ?? ''}
+                                        onChange={(ev) => {
+                                            const v = ev.target.value
+                                            setSelectedCourseId(v ? Number(v) : null)
+                                        }}
+                                        disabled={coursesLoading || !!coursesError}
+                                    >
+                                        <option value="">
+                                            {coursesLoading ? 'Загрузка курсов...' : 'Выберите курс'}
                                         </option>
-                                    ))}
-                                </select>
+                                        {courses.map((c) => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.title}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </label>
+                            {coursesError && (
+                                <p className="modal__field-hint modal__field-hint--error" role="alert">
+                                    {coursesError}
+                                </p>
+                            )}
+                            {!coursesLoading && !coursesError && courses.length === 0 && (
+                                <p className="modal__field-hint modal__field-hint--warn">
+                                    Сейчас нет доступных курсов. Загляните позже или напишите нам в контактах.
+                                </p>
+                            )}
 
                             <div className="modal__label">
                                 Тариф
@@ -382,10 +496,10 @@ const Header = () => {
                                             <div className="subscription-card__price">
                                                 5 000 ₽/мес
                                             </div>
-                                        </div>
                                             <div className="subscription-card__hover">
                                                 Доступ к записям уроков и материалам, без личного наставника.
                                             </div>
+                                        </div>
                                     </label>
 
                                     <label className="subscription-card">
@@ -457,14 +571,12 @@ const Header = () => {
                             </div>
 
                             {submitError && (
-                                <div style={{ color: 'rgba(255,255,255,.95)', background: 'rgba(255, 0, 0, 0.25)', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                                <div className="modal__alert modal__alert--error" role="alert">
                                     {submitError}
                                 </div>
                             )}
                             {submitSuccess && (
-                                <div style={{ color: 'rgba(255,255,255,.95)', background: 'rgba(0, 255, 120, 0.15)', padding: '0.75rem', borderRadius: '0.5rem' }}>
-                                    {submitSuccess}
-                                </div>
+                                <div className="modal__alert modal__alert--success">{submitSuccess}</div>
                             )}
 
                             <div className="modal__actions">
@@ -484,6 +596,147 @@ const Header = () => {
                                     <WalletIcon />
                                     <span>
                                         {submitLoading ? 'Отправляем...' : 'Получить доступ и оплатить'}
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {isCallOpen && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <div className="modal__header">
+                            <h2 className="modal__title">Заказать звонок</h2>
+                            <button
+                                type="button"
+                                className="modal__close"
+                                onClick={handleCallClose}
+                                aria-label="Закрыть"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <form className="modal__form" onSubmit={handleCallSubmit}>
+                            <label className="modal__label">
+                                ФИО
+                                <div className="modal__control">
+                                    <span className="modal__field-icon" aria-hidden="true">
+                                        <ProfileIcon />
+                                    </span>
+                                    <input
+                                        className="modal__input"
+                                        type="text"
+                                        name="call_fullname"
+                                        value={callFullName}
+                                        onChange={(ev) => setCallFullName(ev.target.value)}
+                                        placeholder="Иванов Иван Иванович"
+                                    />
+                                </div>
+                            </label>
+                            <label className="modal__label">
+                                Номер телефона
+                                <div className="modal__control">
+                                    <span className="modal__field-icon" aria-hidden="true">
+                                        <PhoneIcon />
+                                    </span>
+                                    <input
+                                        className="modal__input"
+                                        type="tel"
+                                        name="call_phone"
+                                        value={callPhone}
+                                        onChange={(ev) => setCallPhone(ev.target.value)}
+                                        placeholder="+7 (999) 999-99-99"
+                                    />
+                                </div>
+                            </label>
+                            <label className="modal__label">
+                                E-mail
+                                <div className="modal__control">
+                                    <span className="modal__field-icon" aria-hidden="true">
+                                        <MailIcon />
+                                    </span>
+                                    <input
+                                        className="modal__input"
+                                        type="email"
+                                        name="call_email"
+                                        value={callEmail}
+                                        onChange={(ev) => setCallEmail(ev.target.value)}
+                                        placeholder="example@gmail.com"
+                                    />
+                                </div>
+                            </label>
+
+                            <div className="modal__checkboxes">
+                                <label className="modal__checkbox">
+                                    <input
+                                        type="checkbox"
+                                        name="call_policy"
+                                        checked={callPolicyChecked}
+                                        onChange={(ev) => setCallPolicyChecked(ev.target.checked)}
+                                    />
+                                    <span>
+                                        Я согласен с{' '}
+                                        <a href="/docs/privacy" target="_blank" rel="noopener noreferrer">
+                                            Политикой обработки персональных данных
+                                        </a>
+                                    </span>
+                                </label>
+                                <label className="modal__checkbox">
+                                    <input
+                                        type="checkbox"
+                                        name="call_offer"
+                                        checked={callOfferChecked}
+                                        onChange={(ev) => setCallOfferChecked(ev.target.checked)}
+                                    />
+                                    <span>
+                                        Я принимаю условия{' '}
+                                        <a href="/docs/offer" target="_blank" rel="noopener noreferrer">
+                                            Публичной оферты
+                                        </a>
+                                    </span>
+                                </label>
+                                <label className="modal__checkbox">
+                                    <input
+                                        type="checkbox"
+                                        name="call_contract"
+                                        checked={callContractChecked}
+                                        onChange={(ev) => setCallContractChecked(ev.target.checked)}
+                                    />
+                                    <span>
+                                        Ознакомлен с{' '}
+                                        <a href="/docs/contract" target="_blank" rel="noopener noreferrer">
+                                            Договором об оказании услуг
+                                        </a>
+                                    </span>
+                                </label>
+                            </div>
+
+                            {callSubmitError && (
+                                <div className="modal__alert modal__alert--error">{callSubmitError}</div>
+                            )}
+                            {callSubmitSuccess && (
+                                <div className="modal__alert modal__alert--success">{callSubmitSuccess}</div>
+                            )}
+
+                            <div className="modal__actions">
+                                <button
+                                    type="button"
+                                    className="modal__button modal__button--secondary"
+                                    onClick={handleCallClose}
+                                    disabled={callSubmitLoading}
+                                >
+                                    Отменить
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="modal__button modal__button--primary"
+                                    disabled={!canSubmitCall}
+                                >
+                                    <PhoneIcon />
+                                    <span>
+                                        {callSubmitLoading ? 'Отправляем...' : 'Отправить заявку'}
                                     </span>
                                 </button>
                             </div>

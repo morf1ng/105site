@@ -197,7 +197,7 @@ button {
 .subscription-card__hover {
 	/* Плавное появление вместо display:none/block */
 	border-radius: 1em;
-	border: 1px solid rgba(var(--light-rgb), 0.30);
+	border: 1px solid rgba(var(--light-rgb), 0.25);
 	background: rgba(var(--dark-rgb), 0.9);
 
 	gap: 0.75rem;

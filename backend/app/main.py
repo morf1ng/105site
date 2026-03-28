@@ -10,6 +10,7 @@ from .projects import router as projects_router
 from .auth import router as auth_router
 from .admin import router as admin_router
 from .courses import router as courses_router
+from .callbacks import router as callbacks_router
 
 app = FastAPI(title="105 SOFT STUDIO Backend",
     description="MAIN SITE API FOR WORK DATABASE",
@@ -72,4 +73,5 @@ app.include_router(auth_router, prefix="/api")
 
 app.include_router(admin_router, prefix="/api")
 app.include_router(courses_router, prefix="/api")
+app.include_router(callbacks_router, prefix="/api")
 

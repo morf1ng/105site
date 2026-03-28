@@ -70,10 +70,7 @@ export type UpdateUserRequest = {
   role_ids?: string; // comma-separated role IDs
 };
 
-// Backend URL: из .env.local (NEXT_PUBLIC_API_BASE_URL) или localhost:8000 по умолчанию
-const BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000')
-  .replace(/\/$/, '')
-  .replace(/\/api$/, '');
+const BASE_URL = ('http://localhost:8000').replace(/\/$/, '').replace(/\/api$/, '');
 const API_BASE_URL = `${BASE_URL}/api`;
 
 export const getImageUrl = (path: string | null) => {
@@ -508,6 +505,47 @@ export async function registerCourseOnApi(
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`Course registration failed ${res.status}: ${res.statusText}${text ? ` – ${text.slice(0, 200)}` : ''}`);
+  }
+
+  return res.json();
+}
+
+// Заявка на обратный звонок (POST /api/callback-requests)
+export type CallbackRequestPayload = {
+  full_name: string;
+  phone: string;
+  email: string;
+};
+
+export type CallbackRequestResponse = {
+  detail: string;
+  id: number;
+};
+
+export async function submitCallbackRequest(
+  request: CallbackRequestPayload
+): Promise<CallbackRequestResponse> {
+  const token = getAccessToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE_URL}/callback-requests`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(request),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(
+      `Callback request failed ${res.status}: ${res.statusText}${
+        text ? ` – ${text.slice(0, 200)}` : ''
+      }`
+    );
   }
 
   return res.json();
