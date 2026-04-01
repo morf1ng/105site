@@ -76,9 +76,3 @@ class CourseRegistrationIn(BaseModel):
     email: str
     course_id: int
     support_type: str  # 'basic' | 'with_support'
-
-
-class CallbackRequestIn(BaseModel):
-    full_name: str
-    phone: str
-    email: str

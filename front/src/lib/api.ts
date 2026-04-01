@@ -510,47 +510,6 @@ export async function registerCourseOnApi(
   return res.json();
 }
 
-// Заявка на обратный звонок (POST /api/callback-requests)
-export type CallbackRequestPayload = {
-  full_name: string;
-  phone: string;
-  email: string;
-};
-
-export type CallbackRequestResponse = {
-  detail: string;
-  id: number;
-};
-
-export async function submitCallbackRequest(
-  request: CallbackRequestPayload
-): Promise<CallbackRequestResponse> {
-  const token = getAccessToken();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-  if (token) {
-    headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-  }
-
-  const res = await fetch(`${API_BASE_URL}/callback-requests`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(request),
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(
-      `Callback request failed ${res.status}: ${res.statusText}${
-        text ? ` – ${text.slice(0, 200)}` : ''
-      }`
-    );
-  }
-
-  return res.json();
-}
-
 // ===== Debug =====
 
 // Получить список таблиц БД (GET /tables)

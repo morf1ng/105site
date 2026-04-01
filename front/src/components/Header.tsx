@@ -1,15 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState, type FormEvent } from "react"
+import { useEffect, useMemo, useState } from "react"
 import BurgerMenu from "./listeners/BurgerMenu"
 import HeaderHide from "./listeners/HeaderHide"
-import {
-    fetchCoursesFromApi,
-    registerCourseOnApi,
-    submitCallbackRequest,
-    type ApiCourse,
-    type CourseSupportType,
-} from '@/lib/api'
+import { fetchCoursesFromApi, registerCourseOnApi, type ApiCourse, type CourseSupportType } from '@/lib/api'
 
 const ProfileIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -91,12 +85,12 @@ const Header = () => {
         setIsApplyOpen(true)
     }
 
-    const closeApply = () => {
-        setIsApplyOpen(false)
-    }
-
     const openCall = () => {
         setIsCallOpen(true)
+    }
+
+    const closeApply = () => {
+        setIsApplyOpen(false)
     }
 
     const closeCall = () => {
@@ -112,26 +106,11 @@ const Header = () => {
             policyChecked &&
             offerChecked &&
             contractChecked &&
-            !submitLoading &&
-            !coursesLoading &&
-            !coursesError &&
-            courses.length > 0
+            !submitLoading
         )
-    }, [
-        contractChecked,
-        courses.length,
-        coursesError,
-        coursesLoading,
-        email,
-        offerChecked,
-        fullName,
-        phone,
-        policyChecked,
-        selectedCourseId,
-        submitLoading,
-    ])
+    }, [contractChecked, email, offerChecked, fullName, phone, policyChecked, selectedCourseId, submitLoading])
 
-    const canSubmitCall = useMemo(() => {
+    const canCallSubmit = useMemo(() => {
         return (
             callFullName.trim().length > 0 &&
             callPhone.trim().length > 0 &&
@@ -141,48 +120,39 @@ const Header = () => {
             callContractChecked &&
             !callSubmitLoading
         )
-    }, [
-        callContractChecked,
-        callEmail,
-        callFullName,
-        callOfferChecked,
-        callPhone,
-        callPolicyChecked,
-        callSubmitLoading,
-    ])
+    }, [callContractChecked, callEmail, callFullName, callOfferChecked, callPhone, callPolicyChecked, callSubmitLoading])
 
     useEffect(() => {
-        if (isApplyOpen || isCallOpen) {
-            document.body.classList.add('no-scroll')
-        } else {
-            document.body.classList.remove('no-scroll')
+        if (!isApplyOpen && !isCallOpen) return
+
+        // prevent body scroll while modal is open
+        document.body.classList.add('no-scroll')
+
+        // reset status and load courses if needed
+        setSubmitError(null)
+        setSubmitSuccess(null)
+
+        const needsLoad = courses.length === 0 && !coursesLoading
+        if (needsLoad) {
+            ;(async () => {
+                try {
+                    setCoursesLoading(true)
+                    setCoursesError(null)
+                    const list = await fetchCoursesFromApi()
+                    setCourses(list)
+                } catch (e: any) {
+                    console.error('Failed to load courses', e)
+                    setCoursesError('Не удалось загрузить курсы. Попробуйте позже.')
+                } finally {
+                    setCoursesLoading(false)
+                }
+            })()
         }
+
         return () => {
             document.body.classList.remove('no-scroll')
         }
-    }, [isApplyOpen, isCallOpen])
-
-    useEffect(() => {
-        if (!isApplyOpen) return
-
-        setSubmitError(null)
-        setSubmitSuccess(null)
-        setSelectedCourseId(null)
-
-        ;(async () => {
-            try {
-                setCoursesLoading(true)
-                setCoursesError(null)
-                const list = await fetchCoursesFromApi()
-                setCourses(list)
-            } catch (e: unknown) {
-                console.error('Failed to load courses', e)
-                setCoursesError('Не удалось загрузить курсы. Попробуйте позже.')
-            } finally {
-                setCoursesLoading(false)
-            }
-        })()
-    }, [isApplyOpen])
+    }, [courses.length, coursesLoading, isApplyOpen, isCallOpen])
 
     const resetForm = () => {
         setFullName('')
@@ -197,11 +167,6 @@ const Header = () => {
         setSubmitSuccess(null)
     }
 
-    const handleClose = () => {
-        closeApply()
-        resetForm()
-    }
-
     const resetCallForm = () => {
         setCallFullName('')
         setCallPhone('')
@@ -213,41 +178,17 @@ const Header = () => {
         setCallSubmitSuccess(null)
     }
 
-    const handleCallClose = () => {
+    const handleClose = () => {
+        closeApply()
+        resetForm()
+    }
+
+    const handleCloseCall = () => {
         closeCall()
         resetCallForm()
     }
 
-    const handleCallSubmit = async (e: FormEvent) => {
-        e.preventDefault()
-        if (!canSubmitCall) return
-
-        try {
-            setCallSubmitLoading(true)
-            setCallSubmitError(null)
-            setCallSubmitSuccess(null)
-
-            const res = await submitCallbackRequest({
-                full_name: callFullName.trim(),
-                phone: callPhone.trim(),
-                email: callEmail.trim(),
-            })
-            setCallSubmitSuccess(res.detail || 'Заявка принята.')
-
-            setTimeout(() => {
-                handleCallClose()
-            }, 1200)
-        } catch (err: unknown) {
-            console.error('Callback request failed', err)
-            setCallSubmitError(
-                err instanceof Error ? err.message : 'Не удалось отправить заявку.'
-            )
-        } finally {
-            setCallSubmitLoading(false)
-        }
-    }
-
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: any) => {
         e.preventDefault()
         if (!canSubmit) return
         if (selectedCourseId == null) return
@@ -272,13 +213,47 @@ const Header = () => {
             setTimeout(() => {
                 handleClose()
             }, 1200)
-        } catch (err: unknown) {
+        } catch (err: any) {
             console.error('Course registration failed', err)
-            setSubmitError(
-                err instanceof Error ? err.message : 'Не удалось отправить заявку.'
-            )
+            setSubmitError(err?.message || 'Не удалось отправить заявку.')
         } finally {
             setSubmitLoading(false)
+        }
+    }
+
+    const handleCallSubmit = async (e: any) => {
+        e.preventDefault()
+        if (!canCallSubmit) return
+
+        // Reuse backend registration endpoint; for call request use the first available course.
+        const fallbackCourse = courses[0]
+        if (!fallbackCourse) {
+            setCallSubmitError('Курсы ещё не загружены. Попробуйте чуть позже.')
+            return
+        }
+
+        try {
+            setCallSubmitLoading(true)
+            setCallSubmitError(null)
+            setCallSubmitSuccess(null)
+
+            const res = await registerCourseOnApi({
+                full_name: callFullName.trim(),
+                phone: callPhone.trim(),
+                email: callEmail.trim(),
+                course_id: fallbackCourse.id,
+                support_type: 'basic',
+            })
+
+            setCallSubmitSuccess(res.detail || 'Заявка отправлена.')
+            setTimeout(() => {
+                handleCloseCall()
+            }, 1200)
+        } catch (err: any) {
+            console.error('Call request failed', err)
+            setCallSubmitError(err?.message || 'Не удалось отправить заявку.')
+        } finally {
+            setCallSubmitLoading(false)
         }
     }
 
@@ -316,7 +291,11 @@ const Header = () => {
                         </nav>
                     </div>
                     <div className="call">
-                        <button type="button" className="call-btn" onClick={openCall}>
+                        <button
+                            type="button"
+                            className="call-btn"
+                            onClick={openCall}
+                        >
                             Заказать звонок
                         </button>
                         <button
@@ -442,7 +421,7 @@ const Header = () => {
                             </label>
                             <label className="modal__label">
                                 Направление обучения
-                                <div className="modal__control">
+                                <div className="modal__control modal__control--select">
                                     <span className="modal__field-icon" aria-hidden="true">
                                         <StudyHatIcon />
                                     </span>
@@ -465,18 +444,10 @@ const Header = () => {
                                             </option>
                                         ))}
                                     </select>
+                                    <span className="modal__select-arrow" aria-hidden="true">▾</span>
                                 </div>
+                                {coursesError && <span className="modal__help">{coursesError}</span>}
                             </label>
-                            {coursesError && (
-                                <p className="modal__field-hint modal__field-hint--error" role="alert">
-                                    {coursesError}
-                                </p>
-                            )}
-                            {!coursesLoading && !coursesError && courses.length === 0 && (
-                                <p className="modal__field-hint modal__field-hint--warn">
-                                    Сейчас нет доступных курсов. Загляните позже или напишите нам в контактах.
-                                </p>
-                            )}
 
                             <div className="modal__label">
                                 Тариф
@@ -571,12 +542,14 @@ const Header = () => {
                             </div>
 
                             {submitError && (
-                                <div className="modal__alert modal__alert--error" role="alert">
+                                <div style={{ color: 'rgba(255,255,255,.95)', background: 'rgba(255, 0, 0, 0.25)', padding: '0.75rem', borderRadius: '0.5rem' }}>
                                     {submitError}
                                 </div>
                             )}
                             {submitSuccess && (
-                                <div className="modal__alert modal__alert--success">{submitSuccess}</div>
+                                <div style={{ color: 'rgba(255,255,255,.95)', background: 'rgba(0, 255, 120, 0.15)', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                                    {submitSuccess}
+                                </div>
                             )}
 
                             <div className="modal__actions">
@@ -612,7 +585,7 @@ const Header = () => {
                             <button
                                 type="button"
                                 className="modal__close"
-                                onClick={handleCallClose}
+                                onClick={handleCloseCall}
                                 aria-label="Закрыть"
                             >
                                 ×
@@ -628,7 +601,6 @@ const Header = () => {
                                     <input
                                         className="modal__input"
                                         type="text"
-                                        name="call_fullname"
                                         value={callFullName}
                                         onChange={(ev) => setCallFullName(ev.target.value)}
                                         placeholder="Иванов Иван Иванович"
@@ -644,7 +616,6 @@ const Header = () => {
                                     <input
                                         className="modal__input"
                                         type="tel"
-                                        name="call_phone"
                                         value={callPhone}
                                         onChange={(ev) => setCallPhone(ev.target.value)}
                                         placeholder="+7 (999) 999-99-99"
@@ -660,7 +631,6 @@ const Header = () => {
                                     <input
                                         className="modal__input"
                                         type="email"
-                                        name="call_email"
                                         value={callEmail}
                                         onChange={(ev) => setCallEmail(ev.target.value)}
                                         placeholder="example@gmail.com"
@@ -672,7 +642,6 @@ const Header = () => {
                                 <label className="modal__checkbox">
                                     <input
                                         type="checkbox"
-                                        name="call_policy"
                                         checked={callPolicyChecked}
                                         onChange={(ev) => setCallPolicyChecked(ev.target.checked)}
                                     />
@@ -686,7 +655,6 @@ const Header = () => {
                                 <label className="modal__checkbox">
                                     <input
                                         type="checkbox"
-                                        name="call_offer"
                                         checked={callOfferChecked}
                                         onChange={(ev) => setCallOfferChecked(ev.target.checked)}
                                     />
@@ -700,7 +668,6 @@ const Header = () => {
                                 <label className="modal__checkbox">
                                     <input
                                         type="checkbox"
-                                        name="call_contract"
                                         checked={callContractChecked}
                                         onChange={(ev) => setCallContractChecked(ev.target.checked)}
                                     />
@@ -714,17 +681,21 @@ const Header = () => {
                             </div>
 
                             {callSubmitError && (
-                                <div className="modal__alert modal__alert--error">{callSubmitError}</div>
+                                <div style={{ color: 'rgba(255,255,255,.95)', background: 'rgba(255, 0, 0, 0.25)', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                                    {callSubmitError}
+                                </div>
                             )}
                             {callSubmitSuccess && (
-                                <div className="modal__alert modal__alert--success">{callSubmitSuccess}</div>
+                                <div style={{ color: 'rgba(255,255,255,.95)', background: 'rgba(0, 255, 120, 0.15)', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                                    {callSubmitSuccess}
+                                </div>
                             )}
 
                             <div className="modal__actions">
                                 <button
                                     type="button"
                                     className="modal__button modal__button--secondary"
-                                    onClick={handleCallClose}
+                                    onClick={handleCloseCall}
                                     disabled={callSubmitLoading}
                                 >
                                     Отменить
@@ -732,12 +703,9 @@ const Header = () => {
                                 <button
                                     type="submit"
                                     className="modal__button modal__button--primary"
-                                    disabled={!canSubmitCall}
+                                    disabled={!canCallSubmit}
                                 >
-                                    <PhoneIcon />
-                                    <span>
-                                        {callSubmitLoading ? 'Отправляем...' : 'Отправить заявку'}
-                                    </span>
+                                    {callSubmitLoading ? 'Отправляем...' : 'Отправить заявку'}
                                 </button>
                             </div>
                         </form>
