@@ -15,6 +15,11 @@
 	--gray-rgb: 43, 43, 43;
 }
 
+html {
+	/* убирает сдвиг вёрстки при появлении/исчезновении полосы прокрутки */
+	scrollbar-gutter: stable;
+}
+
 body {
 	position: relative;
 	background-color: var(--dark);
@@ -22,6 +27,7 @@ body {
 	overflow-x: hidden;
 }
 
+html.no-scroll,
 body.no-scroll {
 	overflow: hidden;
 }
@@ -137,11 +143,23 @@ header .call {
 }
 
 header .call-btn {
-	background-color: rgba(var(--accent-rgb), .8);
-	padding: 12px 30px;
-	border-radius: 16px;
+	appearance: none;
+	-webkit-appearance: none;
+	font: inherit;
 	font-size: 16px;
 	font-weight: bold;
+	font-family: "Raleway", sans-serif;
+	color: var(--light);
+	background-color: rgba(var(--accent-rgb), .8);
+	border: none;
+	padding: 12px 30px;
+	border-radius: 16px;
+	text-align: center;
+}
+
+header button.call-btn:focus-visible {
+	outline: 2px solid rgba(var(--accent-light-rgb), 0.85);
+	outline-offset: 2px;
 }
 
 header .call-btn--secondary {
@@ -378,7 +396,6 @@ header .lang {
 }
 
 .subscription-card:hover .subscription-card__hover {
-	margin-top: 0.25rem;
 	padding-top: 0.25rem;
 	opacity: 1;
 	transform: translateY(0);
@@ -441,6 +458,13 @@ header .lang {
 .modal__help {
 	font-size: 0.8rem;
 	color: rgba(255, 120, 120, 0.95);
+}
+
+/* место под сообщение об ошибке курсов — без скачка высоты диалога */
+.modal__courses-hint {
+	min-height: 2.75rem;
+	margin-top: 0.35rem;
+	line-height: 1.35;
 }
 
 .modal__actions {

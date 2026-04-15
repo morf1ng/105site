@@ -82,10 +82,14 @@ const Header = () => {
     const [callSubmitSuccess, setCallSubmitSuccess] = useState<string | null>(null)
 
     const openApply = () => {
+        setSubmitError(null)
+        setSubmitSuccess(null)
         setIsApplyOpen(true)
     }
 
     const openCall = () => {
+        setCallSubmitError(null)
+        setCallSubmitSuccess(null)
         setIsCallOpen(true)
     }
 
@@ -123,36 +127,53 @@ const Header = () => {
     }, [callContractChecked, callEmail, callFullName, callOfferChecked, callPhone, callPolicyChecked, callSubmitLoading])
 
     useEffect(() => {
-        if (!isApplyOpen && !isCallOpen) return
+        if (!isApplyOpen && !isCallOpen) {
+            document.documentElement.classList.remove('no-scroll')
+            document.body.classList.remove('no-scroll')
+            document.body.style.paddingRight = ''
+            return
+        }
 
-        // prevent body scroll while modal is open
+        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+        document.documentElement.classList.add('no-scroll')
         document.body.classList.add('no-scroll')
-
-        // reset status and load courses if needed
-        setSubmitError(null)
-        setSubmitSuccess(null)
-
-        const needsLoad = courses.length === 0 && !coursesLoading
-        if (needsLoad) {
-            ;(async () => {
-                try {
-                    setCoursesLoading(true)
-                    setCoursesError(null)
-                    const list = await fetchCoursesFromApi()
-                    setCourses(list)
-                } catch (e: any) {
-                    console.error('Failed to load courses', e)
-                    setCoursesError('Не удалось загрузить курсы. Попробуйте позже.')
-                } finally {
-                    setCoursesLoading(false)
-                }
-            })()
+        if (scrollbarWidth > 0) {
+            document.body.style.paddingRight = `${scrollbarWidth}px`
         }
 
         return () => {
+            document.documentElement.classList.remove('no-scroll')
             document.body.classList.remove('no-scroll')
+            document.body.style.paddingRight = ''
         }
-    }, [courses.length, coursesLoading, isApplyOpen, isCallOpen])
+    }, [isApplyOpen, isCallOpen])
+
+    useEffect(() => {
+        if (!isApplyOpen && !isCallOpen) return
+        if (courses.length > 0) return
+
+        let cancelled = false
+
+        ;(async () => {
+            try {
+                setCoursesLoading(true)
+                setCoursesError(null)
+                const list = await fetchCoursesFromApi()
+                if (!cancelled) setCourses(list)
+            } catch (e: any) {
+                console.error('Failed to load courses', e)
+                if (!cancelled) {
+                    setCoursesError('Не удалось загрузить курсы. Попробуйте позже.')
+                }
+            } finally {
+                if (!cancelled) setCoursesLoading(false)
+            }
+        })()
+
+        return () => {
+            cancelled = true
+        }
+    }, [isApplyOpen, isCallOpen, courses.length])
 
     const resetForm = () => {
         setFullName('')
@@ -446,7 +467,9 @@ const Header = () => {
                                     </select>
                                     <span className="modal__select-arrow" aria-hidden="true">▾</span>
                                 </div>
-                                {coursesError && <span className="modal__help">{coursesError}</span>}
+                                <div className="modal__courses-hint" role="status" aria-live="polite">
+                                    {coursesError ? <span className="modal__help">{coursesError}</span> : null}
+                                </div>
                             </label>
 
                             <div className="modal__label">

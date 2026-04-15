@@ -478,6 +478,17 @@ export type CourseRegistrationResponse = {
   id: number;
 };
 
+export type ApiCourseRegistration = {
+  id: number;
+  full_name: string;
+  phone: string;
+  email: string;
+  course_id: number;
+  course_title: string;
+  support_type: CourseSupportType;
+  created_at?: string | null;
+};
+
 // Получить список курсов (GET /api/courses)
 export async function fetchCoursesFromApi(): Promise<ApiCourse[]> {
   return apiJson<ApiCourse[]>('/courses');
@@ -508,6 +519,80 @@ export async function registerCourseOnApi(
   }
 
   return res.json();
+}
+
+// ===== Courses (admin) =====
+
+export async function fetchAdminCoursesFromApi(): Promise<ApiCourse[]> {
+  return apiJson<ApiCourse[]>('/admin/courses');
+}
+
+export async function createAdminCourseOnApi(title: string): Promise<ApiCourse> {
+  return apiFormUrlEncoded<ApiCourse>('/admin/courses', { title });
+}
+
+export async function updateAdminCourseOnApi(
+  courseId: number | string,
+  title: string
+): Promise<ApiCourse> {
+  return apiFormUrlEncoded<ApiCourse>(
+    `/admin/courses/${courseId}`,
+    { title },
+    { method: 'PUT' }
+  );
+}
+
+export async function deleteAdminCourseOnApi(courseId: number | string) {
+  const token = getAccessToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE_URL}/admin/courses/${courseId}`, {
+    method: 'DELETE',
+    headers,
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(
+      `Delete course failed ${res.status}: ${res.statusText}${
+        text ? ` – ${text.slice(0, 200)}` : ''
+      }`
+    );
+  }
+
+  return res.json();
+}
+
+export async function fetchCourseRegistrationsFromApi(): Promise<ApiCourseRegistration[]> {
+  return apiJson<ApiCourseRegistration[]>('/admin/course-registrations');
+}
+
+export async function exportCourseRegistrationsFromApi(): Promise<Blob> {
+  const token = getAccessToken();
+  const headers = new Headers();
+  if (token) {
+    headers.set('Authorization', token.startsWith('Bearer ') ? token : `Bearer ${token}`);
+  }
+
+  const res = await fetch(`${API_BASE_URL}/admin/export/course-registrations`, {
+    method: 'GET',
+    headers,
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(
+      `Export failed ${res.status}: ${res.statusText}${
+        text ? ` – ${text.slice(0, 200)}` : ''
+      }`
+    );
+  }
+
+  return res.blob();
 }
 
 // ===== Debug =====

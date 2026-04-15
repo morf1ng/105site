@@ -3,7 +3,7 @@ import Link from 'next/link'
 import '../app/admin/page.css'
 
 type AdminSidebarProps = {
-    activePage?: 'projects' | 'users' | 'roles'
+    activePage?: 'projects' | 'users' | 'roles' | 'courses'
 }
 
 const AdminSidebar = ({ activePage }: AdminSidebarProps) => {
@@ -27,6 +27,12 @@ const AdminSidebar = ({ activePage }: AdminSidebarProps) => {
                         className={activePage === 'projects' ? 'sidebar__nav--active' : 'sidebar__nav'}
                     >
                         Проекты
+                    </Link>
+                    <Link 
+                        href="/admin/courses" 
+                        className={activePage === 'courses' ? 'sidebar__nav--active' : 'sidebar__nav'}
+                    >
+                        Курсы
                     </Link>
                     <Link 
                         href="/admin/users" 
